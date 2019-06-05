@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 import fr.cril.cli.CliOptionDefinitionException;
 import fr.cril.cli.annotations.Args;
+import fr.cril.cli.annotations.Description;
 import fr.cril.cli.annotations.LongName;
 import fr.cril.cli.annotations.Param;
 import fr.cril.cli.annotations.Required;
@@ -62,7 +63,10 @@ public enum EFieldAnnotation {
 	REQUIRED(Required.class, (f, a, o) -> o.setRequired(f, ((Required) a).value())),
 	
 	/** enumeration constant related to parameters (non option arguments) */
-	PARAM(Param.class, (f, a, o) -> o.setParam(f, ((Param) a).value()));
+	PARAM(Param.class, (f, a, o) -> o.setParam(f, ((Param) a).value())),
+	
+	/** enumeration constant related to parameters (non option arguments) */
+	DESCRIPTION(Description.class, (f, a, o) -> o.setDescription(f, ((Description) a).value()));
 	
 	private final Class<? extends Annotation> annotationCl;
 	

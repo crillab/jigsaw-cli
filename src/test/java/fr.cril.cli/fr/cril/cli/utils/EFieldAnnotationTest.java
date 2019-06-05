@@ -40,6 +40,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import fr.cril.cli.CliOptionDefinitionException;
 import fr.cril.cli.CliUsageException;
 import fr.cril.cli.annotations.Args;
+import fr.cril.cli.annotations.Description;
 import fr.cril.cli.annotations.LongName;
 import fr.cril.cli.annotations.Param;
 import fr.cril.cli.annotations.Required;
@@ -52,6 +53,7 @@ public class EFieldAnnotationTest {
 	@ShortName('o')
 	@LongName("opt")
 	@Args(1)
+	@Description("I'm the option")
 	@Required
 	private int option;
 	
@@ -119,6 +121,12 @@ public class EFieldAnnotationTest {
 	public void testApplyParam() throws CliOptionDefinitionException {
 		EFieldAnnotation.PARAM.apply(this.paramField, this.paramField.getAnnotation(Param.class), this.options);
 		assertEquals(1, this.options.nParams());
+	}
+	
+	@Test
+	public void testApplyDescription() throws CliOptionDefinitionException {
+		EFieldAnnotation.DESCRIPTION.apply(this.optField, this.optField.getAnnotation(Description.class), this.options);
+		assertEquals("I'm the option", this.options.getDescription(this.optField));
 	}
 	
 }

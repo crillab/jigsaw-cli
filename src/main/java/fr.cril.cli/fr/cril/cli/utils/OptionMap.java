@@ -61,7 +61,11 @@ public class OptionMap {
 	
 	private final Map<Field, Boolean> required = new HashMap<>();
 	
+	private final Map<Field, String> descriptions = new HashMap<>();
+	
 	private static final int DEFAULT_OPT_MULT = 0;
+	
+	private static final String DEFAULT_DESCRIPTION = "";
 	
 	private Multiplicity paramMultiplicity = null;
 	
@@ -249,6 +253,10 @@ public class OptionMap {
 		if(unnamedWithRequiredFlag.isPresent()) {
 			throw new CliOptionDefinitionException("the following fields have \"required\" flag but no name: "+unnamedWithRequiredFlag.get());
 		}
+		final Optional<String> unnamedWithDescription = unnamedIn(this.descriptions.keySet());
+		if(unnamedWithDescription.isPresent()) {
+			throw new CliOptionDefinitionException("the following fields have descriptions but no name: "+unnamedWithDescription.get());
+		}
 		int nParams = this.parameters.size();
 		final Optional<String> namedParams = namedIn(this.parameters);
 		if(namedParams.isPresent()) {
@@ -365,6 +373,48 @@ public class OptionMap {
 	 */
 	public Multiplicity getParamMultiplicity() {
 		return this.paramMultiplicity == null ? DEFAULT_PARAM_MULTIPLICITY : this.paramMultiplicity;
+	}
+	
+	/**
+	 * Sets the description associated to an option given by its field.
+	 * This description is used while printing usage.
+	 * 
+	 * The description must be non null and nonempty.
+	 * 
+	 * A same field cannot be associated a description twice.
+	 * 
+	 * Descriptions must be associated to named fields (with short or long names).
+	 * The check is not processed in this method, allowing to define the option name after the description;
+	 * the check is done in the {@link OptionMap#sanityChecks()} method.
+	 * 
+	 * @param field the field
+	 * @param description the description
+	 * @throws CliOptionDefinitionException if a description is associated twice to a field
+	 */
+	public void setDescription(final Field field, final String description) throws CliOptionDefinitionException {
+		if(description == null) {
+			throw new CliOptionDefinitionException(field+": null description provided");
+		}
+		if(description.isEmpty()) {
+			throw new CliOptionDefinitionException(field+": empty description provided");
+		}
+		if(this.descriptions.containsKey(field)) {
+			throw new CliOptionDefinitionException(field+": multiple definition of the description");
+		}
+		this.descriptions.put(field, description);
+	}
+	
+	/**
+	 * Returns the description associated to an option, given by its field.
+	 * 
+	 * In case no description has been set, an empty one is returned.
+	 * 
+	 * @param field the field
+	 * @return the description, or an empty string if none.
+	 */
+	public String getDescription(final Field field) {
+		final String descr = this.descriptions.get(field);
+		return descr == null ? DEFAULT_DESCRIPTION : descr;
 	}
 	
 }

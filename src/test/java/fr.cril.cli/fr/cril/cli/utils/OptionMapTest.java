@@ -309,5 +309,40 @@ public class OptionMapTest {
 		this.options.setMultiplicity(this.field, 1);
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.sanityChecks());
 	}
+	
+	@Test
+	public void testSetDescription() throws CliOptionDefinitionException {
+		this.options.setDescription(this.field, "foobar");
+		this.options.setShortName(this.field, 'a');
+		assertEquals("foobar", this.options.getDescription(this.field));
+	}
+	
+	@Test
+	public void testGetDefaultDescription() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, 'a');
+		assertEquals("", this.options.getDescription(this.field));
+	}
+	
+	@Test
+	public void testSetNullDescription() {
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setDescription(this.field, null));
+	}
+	
+	@Test
+	public void testSetEmptyDescription() {
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setDescription(this.field, ""));
+	}
+	
+	@Test
+	public void testSetDescriptionTwice() throws CliOptionDefinitionException {
+		this.options.setDescription(this.field, "foobar");
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setDescription(this.field, "foobar"));
+	}
+	
+	@Test
+	public void testSanityUnnamedWithDescription() throws CliOptionDefinitionException {
+		this.options.setDescription(this.field, "foobar");
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.sanityChecks());
+	}
 
 }
