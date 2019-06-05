@@ -61,7 +61,7 @@ public class ClassParser<T> {
 	 * @return an {@link OptionMap} describing the options
 	 * @throws CliOptionDefinitionException in case errors are detected in the definition of the options
 	 */
-	public OptionMap parse() throws CliOptionDefinitionException {
+	OptionMap parse() throws CliOptionDefinitionException {
 		final OptionMap optMap = new OptionMap();
 		for(final Annotation annotation: this.instance.getClass().getAnnotations()) {
 			final Class<? extends Annotation> annotationType = annotation.annotationType();
