@@ -344,5 +344,17 @@ public class OptionMapTest {
 		this.options.setDescription(this.field, "foobar");
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.sanityChecks());
 	}
+	
+	@Test
+	public void testSharedShortName() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, 'a');
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, 'b'));
+	}
+	
+	@Test
+	public void testSharedLongName() throws CliOptionDefinitionException {
+		this.options.setLongName(this.field, "a");
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setLongName(this.field, "a"));
+	}
 
 }

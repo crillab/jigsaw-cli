@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -55,7 +54,11 @@ public class OptionMap {
 	
 	private final Map<Character, Field> shortOpts = new HashMap<>();
 	
+	private final Map<Field, Character> revShortOpts = new HashMap<>();
+	
 	private final Map<String, Field> longOpts = new HashMap<>();
+	
+	private final Map<Field, String> revLongOpts = new HashMap<>();
 	
 	private final Map<Field, Integer> multiplicities = new HashMap<>();
 	
@@ -90,7 +93,11 @@ public class OptionMap {
 		if(this.shortOpts.containsKey(shortName)) {
 			throw new CliOptionDefinitionException(field+": short option \""+shortName+"\" used more than once");
 		}
+		if(revShortOpts.containsKey(field)) {
+			throw new CliOptionDefinitionException(field+": multiple short names");
+		}
 		this.shortOpts.put(shortName, field);
+		this.revShortOpts.put(field, shortName);
 	}
 	
 	/**
@@ -137,7 +144,11 @@ public class OptionMap {
 		if(this.longOpts.containsKey(longName)) {
 			throw new CliOptionDefinitionException(field+longOptStr+longName+"\" is already in use by "+this.longOpts.get(longName));
 		}
+		if(this.revLongOpts.containsKey(field)) {
+			throw new CliOptionDefinitionException(field+": multiple long names"+this.longOpts.get(longName));
+		}
 		this.longOpts.put(longName, field);
+		this.revLongOpts.put(field, longName);
 	}
 	
 	/**
@@ -269,11 +280,11 @@ public class OptionMap {
 	}
 	
 	private Optional<String> unnamedIn(final Collection<Field> fields) {
-		return fields.stream().filter(f -> !this.shortOpts.containsValue(f)).filter(f -> !this.longOpts.containsValue(f)).map(Object::toString).reduce((a,b) -> a+","+b);
+		return fields.stream().filter(f -> !this.revShortOpts.containsKey(f)).filter(f -> !this.revLongOpts.containsKey(f)).map(Object::toString).reduce((a,b) -> a+","+b);
 	}
 	
 	private Optional<String> namedIn(final Collection<Field> fields) {
-		return fields.stream().filter(f -> this.shortOpts.containsValue(f) || this.longOpts.containsValue(f)).map(Object::toString).reduce((a,b) -> a+","+b);
+		return fields.stream().filter(f -> this.revShortOpts.containsKey(f) || this.revLongOpts.containsKey(f)).map(Object::toString).reduce((a,b) -> a+","+b);
 	}
 	
 	/**
@@ -285,17 +296,17 @@ public class OptionMap {
 	 * @return the string describing the option
 	 */
 	public String fieldToString(final Field field) {
-		final Optional<Character> shortName = this.shortOpts.entrySet().stream().filter(e -> e.getValue().equals(field)).map(Entry::getKey).findAny();
-		final Optional<String> longName = this.longOpts.entrySet().stream().filter(e -> e.getValue().equals(field)).map(Entry::getKey).findAny();
-		if(shortName.isPresent()) {
-			final String shortNameStr = "-"+shortName.get();
-			if(longName.isPresent()) {
-				return "--"+longName.get()+" ("+shortNameStr+")";
+		final Character shortName = this.revShortOpts.get(field);
+		final String longName = this.revLongOpts.get(field);
+		if(shortName != null) {
+			final String shortNameStr = "-"+shortName;
+			if(longName != null) {
+				return "--"+longName+" ("+shortNameStr+")";
 			}
 			return shortNameStr;
 		} else {
-			if(longName.isPresent()) {
-				return "--"+longName.get();
+			if(longName != null) {
+				return "--"+longName;
 			}
 			throw new IllegalArgumentException(field+": one of short or long name must be defined");
 		}
