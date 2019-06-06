@@ -366,8 +366,7 @@ public class OptionMapTest {
 	@Test
 	public void testSharedLongName() throws CliOptionDefinitionException {
 		this.options.setLongName(this.field, "a");
-		final CliOptionDefinitionException exception = assertThrows(CliOptionDefinitionException.class, () -> this.options.setLongName(this.field, "a"));
-		assertEquals("", exception.getMessage());
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setLongName(this.field, "b"));
 	}
 	
 	@Test
