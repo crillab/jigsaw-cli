@@ -44,7 +44,11 @@ import java.lang.annotation.Target;
 @Target(FIELD)
 public @interface Required {
 	
-	/** the value of the required flag */
+	/**
+	 * Returns the value of the required flag.
+	 * 
+	 * @return the value of the required flag
+	 */
 	boolean value() default true;
 
 }

@@ -43,7 +43,11 @@ import java.lang.annotation.Target;
 @Target(FIELD)
 public @interface Args {
 	
-	/** the parameter multiplicity */
+	/**
+	 * Returns the parameter multiplicity.
+	 * 
+	 * @return the parameter multiplicity
+	 */
 	int value() default 0;
 	
 }

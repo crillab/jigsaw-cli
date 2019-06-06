@@ -43,6 +43,10 @@ import java.lang.annotation.Target;
 @Target(FIELD)
 public @interface ShortName {
 
-	/** the short name of the option */
+	/**
+	 * Returns the short name of the option.
+	 * 
+	 * @return the short name of the option
+	 */
 	char value() default '\0';
 }

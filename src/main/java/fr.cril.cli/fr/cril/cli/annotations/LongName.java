@@ -44,6 +44,10 @@ import java.lang.annotation.Target;
 @Target(FIELD)
 public @interface LongName {
 
-	/** the long name of the option */
+	/**
+	 * Returns the long name of the option.
+	 * 
+	 * @return the long name of the option
+	 */
 	String value() default "";
 }

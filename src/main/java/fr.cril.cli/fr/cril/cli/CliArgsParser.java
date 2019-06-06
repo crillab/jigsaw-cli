@@ -53,7 +53,7 @@ public class CliArgsParser<T> {
 	/**
 	 * Builds a new CLI arguments parser using a {@link ClassParser}.
 	 * 
-	 * @param optParser
+	 * @param optParser the {@link ClassParser}
 	 */
 	public CliArgsParser(final ClassParser<T> optParser) {
 		this.optParser = optParser;
