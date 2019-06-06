@@ -1,5 +1,7 @@
 package fr.cril.cli;
 
+import java.io.PrintWriter;
+
 /*-
  * #%L
  * Jigsaw-cli
@@ -42,6 +44,8 @@ public class ClassParser<T> {
 	
 	private final T instance;
 	
+	private OptionMap optMap;
+	
 	/**
 	 * Builds a parser given the class instance under consideration.
 	 * 
@@ -62,19 +66,19 @@ public class ClassParser<T> {
 	 * @throws CliOptionDefinitionException in case errors are detected in the definition of the options
 	 */
 	OptionMap parse() throws CliOptionDefinitionException {
-		final OptionMap optMap = new OptionMap();
+		this.optMap = new OptionMap();
 		for(final Annotation annotation: this.instance.getClass().getAnnotations()) {
 			final Class<? extends Annotation> annotationType = annotation.annotationType();
 			if(!EClassAnnotation.hasForClass(annotationType)) {
 				continue;
 			}
-			EClassAnnotation.forClass(annotationType).apply(annotation, optMap);
+			EClassAnnotation.forClass(annotationType).apply(annotation, this.optMap);
 		}
 		for(final Field f : this.instance.getClass().getDeclaredFields()) {
-			parseField(optMap, f);
+			parseField(this.optMap, f);
 		}
-		optMap.sanityChecks();
-		return optMap;
+		this.optMap.sanityChecks();
+		return this.optMap;
 	}
 	
 	private void parseField(final OptionMap optMap, final Field field) throws CliOptionDefinitionException {
@@ -85,6 +89,15 @@ public class ClassParser<T> {
 			}
 			EFieldAnnotation.forClass(annotationType).apply(field, annotation, optMap);
 		}
+	}
+	
+	/**
+	 * Prints the option list and their description into the provided {@link PrintWriter}.
+	 * 
+	 * @param out the {@link PrintWriter}
+	 */
+	public void printOptionUsage(final PrintWriter out) {
+		this.optMap.printOptionUsage(out);
 	}
 
 }

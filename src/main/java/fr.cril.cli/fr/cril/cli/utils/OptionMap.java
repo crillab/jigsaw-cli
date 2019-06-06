@@ -455,6 +455,11 @@ public class OptionMap {
 		return descr == null ? DEFAULT_DESCRIPTION : descr;
 	}
 	
+	/**
+	 * Prints the option list and their description into the provided {@link PrintWriter}.
+	 * 
+	 * @param out the {@link PrintWriter}
+	 */
 	public void printOptionUsage(final PrintWriter out) {
 		final List<Field> fields = Stream.concat(this.revShortOpts.keySet().stream(), this.revLongOpts.keySet().stream()).distinct().sorted((f1, f2) -> {
 			final Character short1 = this.revShortOpts.get(f1);
