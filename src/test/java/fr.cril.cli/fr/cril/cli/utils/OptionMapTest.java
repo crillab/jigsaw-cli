@@ -49,10 +49,12 @@ public class OptionMapTest {
 	
 	private Field field;
 	
+	@SuppressWarnings("unused")
 	private Object obj2 = new Object();
 	
 	private Field field2;
 	
+	@SuppressWarnings("unused")
 	private Object obj3 = new Object();
 	
 	private Field field3;
@@ -427,5 +429,69 @@ public class OptionMapTest {
 		this.options.printOptionUsage(pw);
 		assertEquals("    --a     descr1\n -b         descr2\n -c,--abc         \n", new String(os.toByteArray()));
 	}
-
+	
+	@Test
+	public void testSetNullLongName() throws CliOptionDefinitionException, CliUsageException {
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setLongName(this.field, null));
+	}
+	
+	@Test
+	public void testSetNullParamMultiplicity() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setParamMultiplicity(null));
+	}
+	
+	@Test
+	public void testSetDescriptionNullField() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setDescription(null, "foo"));
+	}
+	
+	@Test
+	public void testSetLongNameNullField() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setLongName(null, "foo"));
+	}
+	
+	@Test
+	public void testSetMultiplicityNullField() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setMultiplicity(null, 1));
+	}
+	
+	@Test
+	public void testSetParamNullField() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setParam(null, 0));
+	}
+	
+	@Test
+	public void testSetRequiredNullField() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setRequired(null, true));
+	}
+	
+	@Test
+	public void testSetShortNameNullField() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.setShortName(null, 'a'));
+	}
+	
+	@Test
+	public void testGetMultiplityNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.getArgMultiplicity(null));
+	}
+	
+	@Test
+	public void testGetDescriptionNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.getDescription(null));
+	}
+	
+	@Test
+	public void testGetFieldNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.getField(null));
+	}
+	
+	@Test
+	public void testIsRequiredNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.isRequired(null));
+	}
+	
+	@Test
+	public void testFieldToStringNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.fieldToString(null));
+	}
 }

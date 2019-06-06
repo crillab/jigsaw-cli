@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import fr.cril.cli.CliOptionDefinitionException;
@@ -127,6 +128,24 @@ public class EFieldAnnotationTest {
 	public void testApplyDescription() throws CliOptionDefinitionException {
 		EFieldAnnotation.DESCRIPTION.apply(this.optField, this.optField.getAnnotation(Description.class), this.options);
 		assertEquals("I'm the option", this.options.getDescription(this.optField));
+	}
+	
+	@ParameterizedTest
+	@EnumSource(EFieldAnnotation.class)
+	public void testApplyNullField(final EFieldAnnotation a) {
+		assertThrows(IllegalArgumentException.class, () -> a.apply(null, this.paramField.getAnnotation(a.getAnnotationClass()), this.options));
+	}
+	
+	@ParameterizedTest
+	@EnumSource(EFieldAnnotation.class)
+	public void testApplyNullAnnotation(final EFieldAnnotation a) {
+		assertThrows(IllegalArgumentException.class, () -> a.apply(this.optField, null, this.options));
+	}
+	
+	@ParameterizedTest
+	@EnumSource(EFieldAnnotation.class)
+	public void testApplyNullOptions(final EFieldAnnotation a) {
+		assertThrows(IllegalArgumentException.class, () -> a.apply(this.optField, this.paramField.getAnnotation(a.getAnnotationClass()), null));
 	}
 	
 }

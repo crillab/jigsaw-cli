@@ -122,7 +122,14 @@ public enum EFieldAnnotation {
 	 * @throws CliOptionDefinitionException in case an issue is found with the use of the library
 	 */
 	public void apply(final Field field, final Annotation annotation, final OptionMap options) throws CliOptionDefinitionException {
+		if(field == null || annotation == null || options == null) {
+			throw new IllegalArgumentException("at least one parameter is null");
+		}
 		this.applier.apply(field, annotation, options);
+	}
+	
+	Class<? extends Annotation> getAnnotationClass() {
+		return this.annotationCl;
 	}
 	
 	@FunctionalInterface

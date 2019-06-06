@@ -93,6 +93,7 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException in case this short name is already in use
 	 */
 	public void setShortName(final Field field, final char shortName) throws CliOptionDefinitionException {
+		checkNullField(field);
 		if(!Character.isLetterOrDigit(shortName)) {
 			throw new CliOptionDefinitionException(field+": short option character \""+shortName+"\" is not a letter or digit");
 		}
@@ -134,6 +135,7 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException in case this long name is already in use
 	 */
 	public void setLongName(final Field field, final String longName) throws CliOptionDefinitionException {
+		checkNullField(field);
 		if(longName == null) {
 			throw new CliOptionDefinitionException(field+": long option string is null");
 		}
@@ -151,7 +153,7 @@ public class OptionMap {
 			throw new CliOptionDefinitionException(field+longOptStr+longName+"\" is already in use by "+this.longOpts.get(longName));
 		}
 		if(this.revLongOpts.containsKey(field)) {
-			throw new CliOptionDefinitionException(field+": multiple long names"+this.longOpts.get(longName));
+			throw new CliOptionDefinitionException(field+": multiple long names");
 		}
 		this.longOpts.put(longName, field);
 		this.revLongOpts.put(field, longName);
@@ -165,6 +167,9 @@ public class OptionMap {
 	 * @throws CliUsageException if no field is associated to this long name
 	 */
 	public Field getField(final String longName) throws CliUsageException {
+		if(longName == null) {
+			throw new IllegalArgumentException();
+		}
 		final Field f = this.longOpts.get(longName);
 		if(f == null) {
 			throw new CliUsageException("no field linked to long option \""+longName+"\"");
@@ -191,6 +196,7 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException if the multiplicity is invalid or defined twice
 	 */
 	public void setMultiplicity(final Field field, final int multiplicity) throws CliOptionDefinitionException {
+		checkNullField(field);
 		if(multiplicity < 0) {
 			throw new CliOptionDefinitionException("multiplicity must be a nonnegative integer");
 		}
@@ -209,6 +215,7 @@ public class OptionMap {
 	 * @return the related multiplicity, or the default one if none was set
 	 */
 	public int getArgMultiplicity(final Field field) {
+		checkNullField(field);
 		final Integer mult = this.multiplicities.get(field);
 		return mult == null ? DEFAULT_OPT_MULT : mult;
 	}
@@ -225,12 +232,19 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException if the flag is set twice
 	 */
 	public void setRequired(final Field field, final boolean value) throws CliOptionDefinitionException {
+		checkNullField(field);
 		if(this.required.containsKey(field)) {
 			throw new CliOptionDefinitionException(field+": multiple occurrences of the required flag");
 		}
 		this.required.put(field, value);
 	}
 	
+	private void checkNullField(final Field field) {
+		if(field == null) {
+			throw new IllegalArgumentException("null field provided");
+		}
+	}
+
 	/**
 	 * Returns the value of the <code>required</code> flag of an option given by its associated field.
 	 * 
@@ -240,6 +254,7 @@ public class OptionMap {
 	 * @return the value of the requirement flag
 	 */
 	public boolean isRequired(final Field field) {
+		checkNullField(field);
 		final Boolean result = this.required.get(field);
 		return result != null && result;
 	}
@@ -334,6 +349,7 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException if an error is detected while setting the field as a parameter
 	 */
 	public void setParam(final Field field, final int paramIndex) throws CliOptionDefinitionException {
+		checkNullField(field);
 		while(this.parameters.size() < paramIndex+1) {
 			this.parameters.add(null);
 		}
@@ -375,6 +391,9 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException if the multiplicity is redefined by this call
 	 */
 	public void setParamMultiplicity(final String multiplicity) throws CliOptionDefinitionException {
+		if(multiplicity == null) {
+			throw new IllegalArgumentException();
+		}
 		if(this.paramMultiplicity != null) {
 			throw new CliOptionDefinitionException("multiple definition of parameter multiplicity");
 		}
@@ -409,6 +428,7 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException if a description is associated twice to a field
 	 */
 	public void setDescription(final Field field, final String description) throws CliOptionDefinitionException {
+		checkNullField(field);
 		if(description == null) {
 			throw new CliOptionDefinitionException(field+": null description provided");
 		}
@@ -430,6 +450,7 @@ public class OptionMap {
 	 * @return the description, or an empty string if none.
 	 */
 	public String getDescription(final Field field) {
+		checkNullField(field);
 		final String descr = this.descriptions.get(field);
 		return descr == null ? DEFAULT_DESCRIPTION : descr;
 	}
