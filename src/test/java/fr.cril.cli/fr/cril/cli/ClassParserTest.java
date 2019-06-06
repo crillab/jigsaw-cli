@@ -30,6 +30,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
@@ -66,6 +68,17 @@ public class ClassParserTest {
 		final OptionParserTestClassNotOk testCl = new OptionParserTestClassNotOk();
 		final ClassParser<OptionParserTestClassNotOk> parser = new ClassParser<>(testCl);
 		assertThrows(CliOptionDefinitionException.class, () -> parser.parse());
+	}
+	
+	@Test
+	public void testPrintOptionUsage() throws CliOptionDefinitionException {
+		final OptionParserTestClassOk testCl = new OptionParserTestClassOk();
+		final ClassParser<OptionParserTestClassOk> parser = new ClassParser<>(testCl);
+		parser.parse();
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		parser.printOptionUsage(pw);
+		assertEquals(" -f,--field <arg0>\n", new String(os.toByteArray()));
 	}
 	
 	@Retention(RUNTIME)

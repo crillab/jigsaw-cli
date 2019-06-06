@@ -506,15 +506,14 @@ public class OptionMap {
 			final String shortPart = matrix[i][0];
 			out.print(shortPart == null ? shortPartRepl : shortPart);
 			final String longPart = matrix[i][1];
-			if(longPart == null) {
-				out.print(longPartRepl);
-			} else {
-				final String longPartFormat = "%s%-"+maxLongOptSize+"s";
-				out.printf(longPartFormat, shortPart == null ? notBothOptSep : ",", longPart);
-			}
+			final String longPartFormat = "%s%-"+maxLongOptSize+"s";
+			final String nonnullShortPart = shortPart == null ? notBothOptSep : ",";
+			out.print(longPart == null ? longPartRepl : String.format(longPartFormat, nonnullShortPart, longPart));
 			final String descr = matrix[i][2];
-			final String descrFormat = "   %-"+maxDescrOptSize+"s\n";
-			out.printf(descrFormat, descr == null ? "" : descr);
+			final String descrFormat = "   %-"+maxDescrOptSize+"s";
+			final String nonnullDescr = descr == null ? "" : descr;
+			final String description = maxDescrOptSize == 0 ? "" : String.format(descrFormat, nonnullDescr);
+			out.println(description);
 		}
 	}
 
