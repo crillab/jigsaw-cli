@@ -1,5 +1,7 @@
 package fr.cril.cli.utils;
 
+import java.io.PrintWriter;
+
 /*-
  * #%L
  * Jigsaw-cli
@@ -31,8 +33,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import fr.cril.cli.CliOptionDefinitionException;
 import fr.cril.cli.CliUsageException;
@@ -428,4 +434,62 @@ public class OptionMap {
 		return descr == null ? DEFAULT_DESCRIPTION : descr;
 	}
 	
+	public void printOptionUsage(final PrintWriter out) {
+		final List<Field> fields = Stream.concat(this.revShortOpts.keySet().stream(), this.revLongOpts.keySet().stream()).distinct().sorted((f1, f2) -> {
+			final Character short1 = this.revShortOpts.get(f1);
+			final String name1 = short1 == null ? this.revLongOpts.get(f1) : Character.toString(short1);
+			final Character short2 = this.revShortOpts.get(f2);
+			final String name2 = short2 == null ? this.revLongOpts.get(f2) : Character.toString(short2);
+			return name1.compareTo(name2);
+		}).collect(Collectors.toList());
+		final String[][] matrix = buildWordMatrix(fields);
+		printMatrix(out, fields, matrix);
+		out.flush();
+	}
+
+	private String[][] buildWordMatrix(final List<Field> fields) {
+		final String[][] matrix = new String[fields.size()][3];
+		for(int i=0; i<fields.size(); ++i) {
+			final Field f = fields.get(i);
+			final Character shortOpt = this.revShortOpts.get(f);
+			if(shortOpt != null) {
+				matrix[i][0] = "-"+shortOpt;
+			}
+			final String longOpt = this.revLongOpts.get(f);
+			if(longOpt != null) {
+				final String args = IntStream.range(0, this.getArgMultiplicity(f)).mapToObj(j -> " <arg"+j+">").reduce((a,b) -> a+b).orElse("");
+				final String fullLongOpt = "--"+longOpt+args;
+				matrix[i][1] = fullLongOpt;
+			}
+			matrix[i][2] = this.descriptions.get(f);
+		}
+		return matrix;
+	}
+	
+	private void printMatrix(final PrintWriter out, final List<Field> fields, final String[][] matrix) {
+		final int maxLongOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][1]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
+		final String longPartRepl0 = IntStream.range(0, maxLongOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse("");
+		final boolean hasNoLongOpt = this.longOpts.isEmpty();
+		final String longPartRepl = hasNoLongOpt ? longPartRepl0 : " "+longPartRepl0;
+		final int maxDescrOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][2]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
+		final boolean hasNoShortOpt = this.shortOpts.isEmpty();
+		final String shortPartRepl = hasNoShortOpt ? "" : "  ";
+		final String notBothOptSep = (hasNoShortOpt || hasNoLongOpt) ? "" : " ";
+		for(int i=0; i<matrix.length; ++i) {
+			out.print(' ');
+			final String shortPart = matrix[i][0];
+			out.print(shortPart == null ? shortPartRepl : shortPart);
+			final String longPart = matrix[i][1];
+			if(longPart == null) {
+				out.print(longPartRepl);
+			} else {
+				final String longPartFormat = "%s%-"+maxLongOptSize+"s";
+				out.printf(longPartFormat, shortPart == null ? notBothOptSep : ",", longPart);
+			}
+			final String descr = matrix[i][2];
+			final String descrFormat = "   %-"+maxDescrOptSize+"s\n";
+			out.printf(descrFormat, descr == null ? "" : descr);
+		}
+	}
+
 }

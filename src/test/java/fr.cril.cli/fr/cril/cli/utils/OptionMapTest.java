@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.Collections;
 
@@ -47,10 +49,20 @@ public class OptionMapTest {
 	
 	private Field field;
 	
+	private Object obj2 = new Object();
+	
+	private Field field2;
+	
+	private Object obj3 = new Object();
+	
+	private Field field3;
+	
 	@BeforeEach
 	public void setUp() throws NoSuchFieldException, SecurityException {
 		this.options = new OptionMap();
 		this.field = OptionMapTest.class.getDeclaredField("options");
+		this.field2 = OptionMapTest.class.getDeclaredField("obj2");
+		this.field3 = OptionMapTest.class.getDeclaredField("obj3");
 	}
 	
 	@ParameterizedTest
@@ -355,6 +367,65 @@ public class OptionMapTest {
 	public void testSharedLongName() throws CliOptionDefinitionException {
 		this.options.setLongName(this.field, "a");
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.setLongName(this.field, "a"));
+	}
+	
+	@Test
+	public void testPrintOptionFull() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, 'a');
+		this.options.setLongName(this.field, "a");
+		this.options.setDescription(this.field, "descr1");
+		this.options.setShortName(this.field2, 'b');
+		this.options.setLongName(this.field2, "ab");
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setShortName(this.field3, 'c');
+		this.options.setLongName(this.field3, "abc");
+		this.options.setDescription(this.field3, "descr3");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" -a,--a     descr1\n -b,--ab    descr2\n -c,--abc   descr3\n", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testPrintOptionNoShort() throws CliOptionDefinitionException {
+		this.options.setLongName(this.field, "a");
+		this.options.setDescription(this.field, "descr1");
+		this.options.setLongName(this.field2, "ab");
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setLongName(this.field3, "abc");
+		this.options.setDescription(this.field3, "descr3");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" --a     descr1\n --ab    descr2\n --abc   descr3\n", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testPrintOptionNoLong() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, 'a');
+		this.options.setDescription(this.field, "descr1");
+		this.options.setShortName(this.field2, 'b');
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setShortName(this.field3, 'c');
+		this.options.setDescription(this.field3, "descr3");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" -a   descr1\n -b   descr2\n -c   descr3\n", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testPrintOptionMixed() throws CliOptionDefinitionException {
+		this.options.setLongName(this.field, "a");
+		this.options.setDescription(this.field, "descr1");
+		this.options.setShortName(this.field2, 'b');
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setShortName(this.field3, 'c');
+		this.options.setLongName(this.field3, "abc");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals("    --a     descr1\n -b         descr2\n -c,--abc         \n", new String(os.toByteArray()));
 	}
 
 }
