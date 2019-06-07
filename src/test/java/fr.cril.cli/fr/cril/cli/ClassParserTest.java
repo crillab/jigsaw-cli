@@ -81,6 +81,21 @@ public class ClassParserTest {
 		assertEquals(" -f,--field <arg0>\n", new String(os.toByteArray()));
 	}
 	
+	@Test
+	public void testShortNamesAmbiguity() {
+		final OptionParserTestWithAmbiguity testCl = new OptionParserTestWithAmbiguity();
+		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(testCl);
+		assertThrows(CliOptionDefinitionException.class, () -> parser.parse());
+	}
+	
+	@Test
+	public void testShortNamesAmbiguityNoMerging() throws CliOptionDefinitionException {
+		final OptionParserTestWithAmbiguity testCl = new OptionParserTestWithAmbiguity();
+		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(testCl);
+		parser.allowShortNamesMerging(false);
+		parser.parse();
+	}
+	
 	@Retention(RUNTIME)
 	@Target(FIELD)
 	private @interface NoOpForField{}
@@ -112,6 +127,18 @@ public class ClassParserTest {
 		@Args(-1)
 		@NoOpForField
 		private String field;
+	}
+	
+	private class OptionParserTestWithAmbiguity {
+		
+		@ShortName("a")
+		private String a;
+		
+		@ShortName("b")
+		private String b;
+		
+		@ShortName("ab")
+		private String ab;
 	}
 	
 }

@@ -82,6 +82,8 @@ public class OptionMap {
 	
 	private static final Multiplicity DEFAULT_PARAM_MULTIPLICITY = new Multiplicity(0);
 	
+	private boolean allowShortNamesMerging = true;
+	
 	/**
 	 * Associates a short name to a field.
 	 * 
@@ -124,7 +126,7 @@ public class OptionMap {
 		}
 		final Field f = this.shortOpts.get(shortName);
 		if(f == null) {
-			throw new CliUsageException("no field linked to short option \""+shortName+"\"");
+			throw new CliUsageException("no short option \"-"+shortName+"\"");
 		}
 		return f;
 	}
@@ -323,10 +325,12 @@ public class OptionMap {
 		if(nParams > mult.getMax()) {
 			throw new CliOptionDefinitionException("number of declared parameters does not match the max parameter multiplicity ("+nParams+" parameters for a multiplicity of "+mult+")");
 		}
-		final List<String> multicharShortNames = this.shortOpts.keySet().stream().filter(s -> s.length() > 1).collect(Collectors.toList());
-		for(final String multicharShortName : multicharShortNames) {
-			if(multicharShortName.chars().allMatch(c -> this.shortOpts.containsKey(Character.toString(c)))) {
-				throw new CliOptionDefinitionException("amgiguity: \""+multicharShortName+"\" may be seen as the concatenation of single-charactered options");
+		if(this.allowShortNamesMerging) {
+			final List<String> multicharShortNames = this.shortOpts.keySet().stream().filter(s -> s.length() > 1).collect(Collectors.toList());
+			for(final String multicharShortName : multicharShortNames) {
+				if(multicharShortName.chars().allMatch(c -> this.shortOpts.containsKey(Character.toString(c)))) {
+					throw new CliOptionDefinitionException("amgiguity: \""+multicharShortName+"\" may be seen as the concatenation of single-charactered options");
+				}
 			}
 		}
 	}
@@ -594,6 +598,22 @@ public class OptionMap {
 			printArgs(out, matrix, i, maxArgOptSize);
 			printDescr(out, matrix, i);
 		}
+	}
+	
+	/**
+	 * Allows short names merging in CLI arguments (<code>-ab</code> means <code>-a -b</code>).
+	 * The merging is allowed only if the options take no parameter.
+	 * 
+	 * The default is <code>true</code>.
+	 * 
+	 * In case merging is allowed, a check is made to prevent ambiguity: declaring <code>-a</code>, <code>-b</code> and <code>-ab</code>
+	 * will cause an exception to be thrown when {@link OptionMap#sanityChecks()} is called.
+	 * Disabling merging allows the declaration of such option set.
+	 * 
+	 * @param allow <code>true</code> to allow
+	 */
+	public void allowShortNamesMerging(final boolean allow) {
+		this.allowShortNamesMerging = allow;
 	}
 
 }

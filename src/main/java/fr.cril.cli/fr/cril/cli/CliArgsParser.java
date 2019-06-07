@@ -49,6 +49,8 @@ public class CliArgsParser<T> {
 	private final List<String> parameters = new ArrayList<>();
 	
 	private final List<Field> seen = new ArrayList<>();
+	
+	private boolean allowShortNamesMerging = true;
 
 	/**
 	 * Builds a new CLI arguments parser using a {@link ClassParser}.
@@ -109,9 +111,17 @@ public class CliArgsParser<T> {
 				parseShortNamedOptAux(obj, optionMap, cur, others);
 				break;
 			}
-			final Queue<String> emptyQueue = new LinkedList<>();
-			for(int i=0; i<cur.length(); ++i) {
-				parseShortNamedOptAux(obj, optionMap, Character.toString(cur.charAt(i)), emptyQueue);
+			if(this.allowShortNamesMerging) {
+				final Queue<String> emptyQueue = new LinkedList<>();
+				for(int i=0; i<cur.length(); ++i) {
+					try {
+						parseShortNamedOptAux(obj, optionMap, Character.toString(cur.charAt(i)), emptyQueue);
+					} catch(CliUsageException e) {
+						throw new CliUsageException(e.getMessage()+" and no \""+cur+"\" short option");
+					}
+				}
+			} else {
+				throw new CliUsageException("no -\""+cur+"\" option");
 			}
 		}
 	}
@@ -169,6 +179,23 @@ public class CliArgsParser<T> {
 	 */
 	public List<String> getParameters() {
 		return Collections.unmodifiableList(this.parameters);
+	}
+	
+	/**
+	 * Allows short names merging in CLI arguments (<code>-ab</code> means <code>-a -b</code>).
+	 * The merging is allowed only if the options take no parameter.
+	 * 
+	 * The default is <code>true</code>.
+	 * 
+	 * In case merging is allowed, a check is made to prevent ambiguity: declaring <code>-a</code>, <code>-b</code> and <code>-ab</code>
+	 * will cause an exception to be thrown when {@link CliArgsParser#parse(Object, String[])} is called.
+	 * Disabling merging allows the declaration of such option set.
+	 * 
+	 * @param allow <code>true</code> to allow
+	 */
+	public void allowShortNamesMerging(final boolean allow) {
+		this.allowShortNamesMerging = allow;
+		this.optParser.allowShortNamesMerging(allow);
 	}
 
 }

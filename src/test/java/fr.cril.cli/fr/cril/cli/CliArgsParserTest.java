@@ -90,6 +90,15 @@ public class CliArgsParserTest {
 	}
 	
 	@Test
+	public void testMergedShortNamesDisallowedMerging() throws CliUsageException, CliOptionDefinitionException {
+		final TestClassOkOptions obj = new TestClassOkOptions();
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
+		cliParser.allowShortNamesMerging(false);
+		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"-m", "foobar", "-fb"}));
+	}
+	
+	@Test
 	public void testMultiplicityError() {
 		final TestClassOkOptions obj = new TestClassOkOptions();
 		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
@@ -233,6 +242,38 @@ public class CliArgsParserTest {
 		cliParser.parse(obj, new String[] {"a", "b", "c"});
 		assertEquals(Stream.of("a", "b", "c").collect(Collectors.toList()), cliParser.getParameters());
 		assertEquals("b", obj.arg1);
+	}
+	
+	private class TestClassWithAmbiguity {
+		
+		@ShortName("a")
+		private boolean a;
+		
+		@ShortName("b")
+		private boolean b;
+		
+		@ShortName("ab")
+		private boolean ab;
+	}
+	
+	@Test
+	public void testAmbiguity() {
+		final TestClassWithAmbiguity obj = new TestClassWithAmbiguity();
+		final ClassParser<TestClassWithAmbiguity> optParser = new ClassParser<>(obj);
+		final CliArgsParser<TestClassWithAmbiguity> cliParser = new CliArgsParser<>(optParser);
+		assertThrows(CliOptionDefinitionException.class, () -> cliParser.parse(obj, new String[] {"-a", "-b", "-ab"}));
+	}
+	
+	@Test
+	public void testAmbiguityNoMerging() throws CliUsageException, CliOptionDefinitionException {
+		final TestClassWithAmbiguity obj = new TestClassWithAmbiguity();
+		final ClassParser<TestClassWithAmbiguity> optParser = new ClassParser<>(obj);
+		final CliArgsParser<TestClassWithAmbiguity> cliParser = new CliArgsParser<>(optParser);
+		cliParser.allowShortNamesMerging(false);
+		cliParser.parse(obj, new String[] {"-a", "-b", "-ab"});
+		assertTrue(obj.a);
+		assertTrue(obj.b);
+		assertTrue(obj.ab);
 	}
 
 }

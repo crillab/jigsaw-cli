@@ -62,6 +62,7 @@ public class OptionMapTest {
 	@BeforeEach
 	public void setUp() throws NoSuchFieldException, SecurityException {
 		this.options = new OptionMap();
+		this.options.allowShortNamesMerging(true);
 		this.field = OptionMapTest.class.getDeclaredField("options");
 		this.field2 = OptionMapTest.class.getDeclaredField("obj2");
 		this.field3 = OptionMapTest.class.getDeclaredField("obj3");
@@ -599,5 +600,14 @@ public class OptionMapTest {
 	@Test
 	public void testHasNullShortName() {
 		assertThrows(IllegalArgumentException.class, () -> this.options.hasShortName(null));
+	}
+	
+	@Test
+	public void testDisallowShortNamesMerging() throws CliOptionDefinitionException {
+		this.options.allowShortNamesMerging(false);
+		this.options.setShortName(this.field, "a");
+		this.options.setShortName(this.field2, "b");
+		this.options.setShortName(this.field3, "ab");
+		this.options.sanityChecks();
 	}
 }

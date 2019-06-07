@@ -46,6 +46,8 @@ public class ClassParser<T> {
 	
 	private OptionMap optMap;
 	
+	private boolean allowShortNamesMerging = true;
+	
 	/**
 	 * Builds a parser given the class instance under consideration.
 	 * 
@@ -67,6 +69,7 @@ public class ClassParser<T> {
 	 */
 	OptionMap parse() throws CliOptionDefinitionException {
 		this.optMap = new OptionMap();
+		this.optMap.allowShortNamesMerging(this.allowShortNamesMerging);
 		for(final Annotation annotation: this.instance.getClass().getAnnotations()) {
 			final Class<? extends Annotation> annotationType = annotation.annotationType();
 			if(!EClassAnnotation.hasForClass(annotationType)) {
@@ -98,6 +101,22 @@ public class ClassParser<T> {
 	 */
 	public void printOptionUsage(final PrintWriter out) {
 		this.optMap.printOptionUsage(out);
+	}
+	
+	/**
+	 * Allows short names merging in CLI arguments (<code>-ab</code> means <code>-a -b</code>).
+	 * The merging is allowed only if the options take no parameter.
+	 * 
+	 * The default is <code>true</code>.
+	 * 
+	 * In case merging is allowed, a check is made to prevent ambiguity: declaring <code>-a</code>, <code>-b</code> and <code>-ab</code>
+	 * will cause an exception to be thrown when {@link ClassParser#parse()} is called.
+	 * Disabling merging allows the declaration of such option set.
+	 * 
+	 * @param allow <code>true</code> to allow
+	 */
+	void allowShortNamesMerging(final boolean allow) {
+		this.allowShortNamesMerging = allow;
 	}
 
 }
