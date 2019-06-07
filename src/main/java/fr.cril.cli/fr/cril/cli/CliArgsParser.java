@@ -102,19 +102,23 @@ public class CliArgsParser<T> {
 		case 0:
 			throw new CliUsageException("empty option: \"-\"");
 		case 1:
-			parseShortNamedOpt(obj, optionMap, cur.charAt(0), others);
+			parseShortNamedOptAux(obj, optionMap, cur, others);
 			break;
 		default:
+			if(optionMap.hasShortName(cur)) {
+				parseShortNamedOptAux(obj, optionMap, cur, others);
+				break;
+			}
 			final Queue<String> emptyQueue = new LinkedList<>();
 			for(int i=0; i<cur.length(); ++i) {
-				parseShortNamedOpt(obj, optionMap, (char) cur.charAt(i), emptyQueue);
+				parseShortNamedOptAux(obj, optionMap, Character.toString(cur.charAt(i)), emptyQueue);
 			}
 		}
 	}
 
-	private void parseShortNamedOpt(final Object obj, final OptionMap optionMap, final char current, final Queue<String> others) throws CliUsageException {
-		final Field field = optionMap.getField(current);
-		readFieldParams(obj, optionMap, field, Character.toString(current), others);
+	private void parseShortNamedOptAux(final Object obj, final OptionMap optionMap, final String current, final Queue<String> others) throws CliUsageException {
+		final Field field = optionMap.getFieldByShortName(current);
+		readFieldParams(obj, optionMap, field, current, others);
 	}
 
 	private void readFieldParams(final Object obj, final OptionMap optionMap, final Field field, final String optName, final Queue<String> others) throws CliUsageException {
@@ -132,7 +136,7 @@ public class CliArgsParser<T> {
 
 	private void parseLongNamedOpt(final Object obj, final OptionMap optionMap, final String current, final Queue<String> others) throws CliUsageException {
 		final String cur = current.substring(2);
-		final Field field = optionMap.getField(cur);
+		final Field field = optionMap.getFieldByLongName(cur);
 		readFieldParams(obj, optionMap, field, cur, others);
 	}
 	

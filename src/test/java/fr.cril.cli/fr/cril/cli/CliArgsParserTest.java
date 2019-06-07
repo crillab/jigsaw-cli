@@ -46,19 +46,22 @@ public class CliArgsParserTest {
 	@Params("0..1")
 	private class TestClassOkOptions {
 		
-		@ShortName('f')
+		@ShortName("f")
 		@LongName("foo")
 		private boolean foo;
 		
-		@ShortName('b')
+		@ShortName("b")
 		@LongName("bar")
 		private boolean bar;
 		
-		@ShortName('m')
+		@ShortName("m")
 		@LongName("mandatory")
 		@Args(1)
 		@Required
 		private String mandatory;
+		
+		@ShortName("multi")
+		private boolean multicharShortNamed;
 		
 		@Param
 		private String param;
@@ -156,6 +159,16 @@ public class CliArgsParserTest {
 		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"-mfb", "foobar"}));
+	}
+	
+	@Test
+	public void testMulticharShortOpt() throws CliUsageException, CliOptionDefinitionException {
+		final TestClassOkOptions obj = new TestClassOkOptions();
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
+		cliParser.parse(obj, new String[] {"-m", "foobar", "-multi"});
+		assertEquals("foobar", obj.mandatory);
+		assertTrue(obj.multicharShortNamed);
 	}
 	
 	@Params("1..2")

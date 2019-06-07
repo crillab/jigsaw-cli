@@ -58,9 +58,9 @@ import fr.cril.cli.annotations.ShortName;
  */
 public class OptionMap {
 	
-	private final Map<Character, Field> shortOpts = new HashMap<>();
+	private final Map<String, Field> shortOpts = new HashMap<>();
 	
-	private final Map<Field, Character> revShortOpts = new HashMap<>();
+	private final Map<Field, String> revShortOpts = new HashMap<>();
 	
 	private final Map<String, Field> longOpts = new HashMap<>();
 	
@@ -92,10 +92,12 @@ public class OptionMap {
 	 * @param shortName the short name
 	 * @throws CliOptionDefinitionException in case this short name is already in use
 	 */
-	public void setShortName(final Field field, final char shortName) throws CliOptionDefinitionException {
+	public void setShortName(final Field field, final String shortName) throws CliOptionDefinitionException {
 		checkNullField(field);
-		if(!Character.isLetterOrDigit(shortName)) {
-			throw new CliOptionDefinitionException(field+": short option character \""+shortName+"\" is not a letter or digit");
+		try {
+			checkOptionName(shortName);
+		} catch(CliOptionDefinitionException e) {
+			throw new CliOptionDefinitionException(field.toString()+": short "+e.getMessage());
 		}
 		if(this.shortOpts.containsKey(shortName)) {
 			throw new CliOptionDefinitionException(field+": short option \""+shortName+"\" used more than once");
@@ -116,12 +118,28 @@ public class OptionMap {
 	 * @return the field associated to the short name
 	 * @throws CliUsageException if no field is associated to this short name
 	 */
-	public Field getField(final char shortName) throws CliUsageException {
+	public Field getFieldByShortName(final String shortName) throws CliUsageException {
+		if(shortName == null) {
+			throw new IllegalArgumentException();
+		}
 		final Field f = this.shortOpts.get(shortName);
 		if(f == null) {
 			throw new CliUsageException("no field linked to short option \""+shortName+"\"");
 		}
 		return f;
+	}
+	
+	/**
+	 * Returns <code>true</code> iff an option with the provided short name exists.
+	 * 
+	 * @param shortName the short name
+	 * @return <code>true</code> iff an option with the provided short name exists
+	 */
+	public boolean hasShortName(final String shortName) {
+		if(shortName == null) {
+			throw new IllegalArgumentException();
+		}
+		return this.shortOpts.containsKey(shortName);
 	}
 	
 	/**
@@ -136,27 +154,34 @@ public class OptionMap {
 	 */
 	public void setLongName(final Field field, final String longName) throws CliOptionDefinitionException {
 		checkNullField(field);
-		if(longName == null) {
-			throw new CliOptionDefinitionException(field+": long option string is null");
-		}
-		if(longName.isEmpty()) {
-			throw new CliOptionDefinitionException(field+": long option string is empty");
-		}
-		final String longOptStr = ": long option string \"";
-		if(!Character.isLetterOrDigit(longName.charAt(0))) {
-			throw new CliOptionDefinitionException(field+longOptStr+longName+"\" must start with a letter");
-		}
-		if(longName.chars().anyMatch(OptionMap::isForbiddenInOptionNames)) {
-			throw new CliOptionDefinitionException(field+longOptStr+longName+"\" contains a character which is not a lettre or a digit");
+		try {
+			checkOptionName(longName);
+		} catch(CliOptionDefinitionException e) {
+			throw new CliOptionDefinitionException(field.toString()+": long "+e.getMessage());
 		}
 		if(this.longOpts.containsKey(longName)) {
-			throw new CliOptionDefinitionException(field+longOptStr+longName+"\" is already in use by "+this.longOpts.get(longName));
+			throw new CliOptionDefinitionException(field+": long option name \""+longName+"\" is already in use by "+this.longOpts.get(longName));
 		}
 		if(this.revLongOpts.containsKey(field)) {
 			throw new CliOptionDefinitionException(field+": multiple long names");
 		}
 		this.longOpts.put(longName, field);
 		this.revLongOpts.put(field, longName);
+	}
+
+	private void checkOptionName(final String name) throws CliOptionDefinitionException {
+		if(name == null) {
+			throw new CliOptionDefinitionException("option name is null");
+		}
+		if(name.isEmpty()) {
+			throw new CliOptionDefinitionException("option name is empty");
+		}
+		if(!Character.isLetterOrDigit(name.charAt(0))) {
+			throw new CliOptionDefinitionException("option name \""+name+"\" must start with a letter or a digit");
+		}
+		if(name.chars().anyMatch(OptionMap::isForbiddenInOptionNames)) {
+			throw new CliOptionDefinitionException("option name \""+name+"\" contains a character which is not a letter, a digit or an hyphen");
+		}
 	}
 	
 	/**
@@ -166,7 +191,7 @@ public class OptionMap {
 	 * @return the field associated to the long name
 	 * @throws CliUsageException if no field is associated to this long name
 	 */
-	public Field getField(final String longName) throws CliUsageException {
+	public Field getFieldByLongName(final String longName) throws CliUsageException {
 		if(longName == null) {
 			throw new IllegalArgumentException();
 		}
@@ -298,6 +323,12 @@ public class OptionMap {
 		if(nParams > mult.getMax()) {
 			throw new CliOptionDefinitionException("number of declared parameters does not match the max parameter multiplicity ("+nParams+" parameters for a multiplicity of "+mult+")");
 		}
+		final List<String> multicharShortNames = this.shortOpts.keySet().stream().filter(s -> s.length() > 1).collect(Collectors.toList());
+		for(final String multicharShortName : multicharShortNames) {
+			if(multicharShortName.chars().allMatch(c -> this.shortOpts.containsKey(Character.toString(c)))) {
+				throw new CliOptionDefinitionException("amgiguity: \""+multicharShortName+"\" may be seen as the concatenation of single-charactered options");
+			}
+		}
 	}
 	
 	private Optional<String> unnamedIn(final Collection<Field> fields) {
@@ -317,7 +348,7 @@ public class OptionMap {
 	 * @return the string describing the option
 	 */
 	public String fieldToString(final Field field) {
-		final Character shortName = this.revShortOpts.get(field);
+		final String shortName = this.revShortOpts.get(field);
 		final String longName = this.revLongOpts.get(field);
 		if(shortName != null) {
 			final String shortNameStr = "-"+shortName;
@@ -462,10 +493,10 @@ public class OptionMap {
 	 */
 	public void printOptionUsage(final PrintWriter out) {
 		final List<Field> fields = Stream.concat(this.revShortOpts.keySet().stream(), this.revLongOpts.keySet().stream()).distinct().sorted((f1, f2) -> {
-			final Character short1 = this.revShortOpts.get(f1);
-			final String name1 = short1 == null ? this.revLongOpts.get(f1) : Character.toString(short1);
-			final Character short2 = this.revShortOpts.get(f2);
-			final String name2 = short2 == null ? this.revLongOpts.get(f2) : Character.toString(short2);
+			final String short1 = this.revShortOpts.get(f1);
+			final String name1 = short1 == null ? this.revLongOpts.get(f1) : short1;
+			final String short2 = this.revShortOpts.get(f2);
+			final String name2 = short2 == null ? this.revLongOpts.get(f2) : short2;
 			return name1.compareTo(name2);
 		}).collect(Collectors.toList());
 		final String[][] matrix = buildWordMatrix(fields);
@@ -474,46 +505,94 @@ public class OptionMap {
 	}
 
 	private String[][] buildWordMatrix(final List<Field> fields) {
-		final String[][] matrix = new String[fields.size()][3];
+		final String[][] matrix = new String[fields.size()][4];
 		for(int i=0; i<fields.size(); ++i) {
 			final Field f = fields.get(i);
-			final Character shortOpt = this.revShortOpts.get(f);
+			final String shortOpt = this.revShortOpts.get(f);
 			if(shortOpt != null) {
 				matrix[i][0] = "-"+shortOpt;
 			}
 			final String longOpt = this.revLongOpts.get(f);
 			if(longOpt != null) {
-				final String args = IntStream.range(0, this.getArgMultiplicity(f)).mapToObj(j -> " <arg"+j+">").reduce((a,b) -> a+b).orElse("");
-				final String fullLongOpt = "--"+longOpt+args;
-				matrix[i][1] = fullLongOpt;
+				matrix[i][1] = "--"+longOpt;
 			}
-			matrix[i][2] = this.descriptions.get(f);
+			final Optional<String> args = IntStream.range(0, this.getArgMultiplicity(f)).mapToObj(j -> "<arg"+j+">").reduce((a,b) -> a+" "+b);
+			if(args.isPresent()) {
+				matrix[i][2] = args.get();
+			}
+			matrix[i][3] = this.descriptions.get(f);
 		}
 		return matrix;
 	}
 	
 	private void printMatrix(final PrintWriter out, final List<Field> fields, final String[][] matrix) {
+		final int maxShortOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][0]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
 		final int maxLongOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][1]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
-		final String longPartRepl0 = IntStream.range(0, maxLongOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse("");
-		final boolean hasNoLongOpt = this.longOpts.isEmpty();
-		final String longPartRepl = hasNoLongOpt ? longPartRepl0 : " "+longPartRepl0;
-		final int maxDescrOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][2]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
-		final boolean hasNoShortOpt = this.shortOpts.isEmpty();
-		final String shortPartRepl = hasNoShortOpt ? "" : "  ";
-		final String notBothOptSep = (hasNoShortOpt || hasNoLongOpt) ? "" : " ";
+		final int maxArgOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][2]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
+		if(maxShortOptSize != 0) {
+			if(maxLongOptSize != 0) {
+				printMatrixBothShortAndLongOpts(out, matrix, maxShortOptSize, maxLongOptSize, maxArgOptSize);
+			} else {
+				printMatrixShortOptsOnly(out, matrix, maxShortOptSize, maxArgOptSize);
+			}
+		} else if(maxLongOptSize != 0) {
+			printMatrixLongOptsOnly(out, matrix, maxLongOptSize, maxArgOptSize);
+		}
+		out.flush();
+	}
+
+	private void printMatrixShortOptsOnly(final PrintWriter out, final String[][] matrix, final int maxShortOptSize, final int maxArgOptSize) {
+		for(int i=0; i<matrix.length; ++i) {
+			final String format = " %"+maxShortOptSize+"s";
+			out.printf(format, matrix[i][0]);
+			printArgs(out, matrix, i, maxArgOptSize);
+			printDescr(out, matrix, i);
+		}
+	}
+
+	private void printArgs(final PrintWriter out, final String[][] matrix, final int fieldIndex, final int maxArgOptSize) {
+		final String args = matrix[fieldIndex][2];
+		if(maxArgOptSize > 0) {
+			if(args == null) {
+				out.print(IntStream.range(0, 1+maxArgOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse(""));
+			} else {
+				final String format = " %-"+maxArgOptSize+"s";
+				out.printf(format, args);
+			}
+		}
+	}
+
+	private void printDescr(final PrintWriter out, final String[][] matrix, final int fieldIndex) {
+		final String descr = matrix[fieldIndex][3];
+		if(descr != null) {
+			out.printf("   %s", descr);
+		}
+		out.print('\n');
+	}
+
+	private void printMatrixLongOptsOnly(final PrintWriter out, final String[][] matrix, final int maxLongOptSize, final int maxArgOptSize) {
+		for(int i=0; i<matrix.length; ++i) {
+			final String format = " %-"+maxLongOptSize+"s";
+			out.printf(format, matrix[i][1]);
+			printArgs(out, matrix, i, maxArgOptSize);
+			printDescr(out, matrix, i);
+		}
+	}
+
+	private void printMatrixBothShortAndLongOpts(final PrintWriter out, final String[][] matrix, final int maxShortOptSize, final int maxLongOptSize, final int maxArgOptSize) {
+		final String emptyShortOpt = IntStream.range(0, maxShortOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse("");
+		final String shortOptFormat = "%"+maxShortOptSize+"s";
+		final String emptyLongOpt = IntStream.range(0, maxLongOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse("");
+		final String longOptFormat = "%-"+maxLongOptSize+"s";
 		for(int i=0; i<matrix.length; ++i) {
 			out.print(' ');
-			final String shortPart = matrix[i][0];
-			out.print(shortPart == null ? shortPartRepl : shortPart);
-			final String longPart = matrix[i][1];
-			final String longPartFormat = "%s%-"+maxLongOptSize+"s";
-			final String nonnullShortPart = shortPart == null ? notBothOptSep : ",";
-			out.print(longPart == null ? longPartRepl : String.format(longPartFormat, nonnullShortPart, longPart));
-			final String descr = matrix[i][2];
-			final String descrFormat = "   %-"+maxDescrOptSize+"s";
-			final String nonnullDescr = descr == null ? "" : descr;
-			final String description = maxDescrOptSize == 0 ? "" : String.format(descrFormat, nonnullDescr);
-			out.println(description);
+			final String shortOpt = matrix[i][0];
+			out.print(shortOpt == null ? emptyShortOpt : String.format(shortOptFormat, shortOpt));
+			final String longOpt = matrix[i][1];
+			out.print(shortOpt != null && longOpt != null ? ',' : ' ');
+			out.print(longOpt == null ? emptyLongOpt : String.format(longOptFormat, longOpt));
+			printArgs(out, matrix, i, maxArgOptSize);
+			printDescr(out, matrix, i);
 		}
 	}
 

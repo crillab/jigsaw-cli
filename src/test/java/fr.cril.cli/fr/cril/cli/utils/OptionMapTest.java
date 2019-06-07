@@ -68,21 +68,28 @@ public class OptionMapTest {
 	}
 	
 	@ParameterizedTest
-	@ValueSource(chars = {' ', '-', '?'})
-	public void testSetShortNameWrongChar(final char c) throws CliOptionDefinitionException {
-		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, c));
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "  ", "???", "-abc", "abc?"})
+	public void testSetShortNameWrongVals(final String s) {
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, s));
 	}
 	
 	@Test
 	public void testSetShortNameMultOcc() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
-		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, 'a'));
+		this.options.setShortName(this.field, "a");
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, "a"));
 	}
 	
 	@Test
 	public void testSetShortName() throws CliOptionDefinitionException, CliUsageException {
-		this.options.setShortName(this.field, 'a');
-		assertEquals(this.field, this.options.getField('a'));
+		this.options.setShortName(this.field, "a");
+		assertEquals(this.field, this.options.getFieldByShortName("a"));
+	}
+	
+	@Test
+	public void testSetShortNameComposed() throws CliOptionDefinitionException, CliUsageException {
+		this.options.setShortName(this.field, "a-b");
+		assertEquals(this.field, this.options.getFieldByShortName("a-b"));
 	}
 	
 	@ParameterizedTest
@@ -101,18 +108,18 @@ public class OptionMapTest {
 	@Test
 	public void testSetLongName() throws CliOptionDefinitionException, CliUsageException {
 		this.options.setLongName(this.field, "a");
-		assertEquals(this.field, this.options.getField("a"));
+		assertEquals(this.field, this.options.getFieldByLongName("a"));
 	}
 	
 	@Test
 	public void testSetLongNameComposed() throws CliOptionDefinitionException, CliUsageException {
 		this.options.setLongName(this.field, "a-b");
-		assertEquals(this.field, this.options.getField("a-b"));
+		assertEquals(this.field, this.options.getFieldByLongName("a-b"));
 	}
 	
 	@Test
 	public void testSetMultiplicity() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setMultiplicity(this.field, 1);
 		final int multiplicity = this.options.getArgMultiplicity(this.field);
 		assertEquals(1, multiplicity);
@@ -120,7 +127,7 @@ public class OptionMapTest {
 	
 	@Test
 	public void testDefaultMultiplicity() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		final int multiplicity = this.options.getArgMultiplicity(this.field);
 		assertEquals(0, multiplicity);
 	}
@@ -149,7 +156,7 @@ public class OptionMapTest {
 	
 	@Test
 	public void testMultSanityOkShort() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setMultiplicity(this.field, 1);
 		this.options.sanityChecks();
 	}
@@ -163,7 +170,7 @@ public class OptionMapTest {
 	
 	@Test
 	public void testMultSanityOkBoth() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setLongName(this.field, "a");
 		this.options.setMultiplicity(this.field, 1);
 		this.options.sanityChecks();
@@ -171,44 +178,44 @@ public class OptionMapTest {
 	
 	@Test
 	public void testGetFieldWrongShortName() {
-		assertThrows(CliUsageException.class, () -> this.options.getField('a'));
+		assertThrows(CliUsageException.class, () -> this.options.getFieldByShortName("a"));
 	}
 	
 	@Test
 	public void testGetFieldWrongLongName() {
-		assertThrows(CliUsageException.class, () -> this.options.getField("arg"));
+		assertThrows(CliUsageException.class, () -> this.options.getFieldByLongName("arg"));
 	}
 	
 	@Test
 	public void testRequiredTrue() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setRequired(this.field, true);
 		assertTrue(this.options.isRequired(this.field));
 	}
 	
 	@Test
 	public void testRequiredSet() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setRequired(this.field, true);
 		assertEquals(Collections.singleton(this.field), this.options.getRequiredFields());
 	}
 	
 	@Test
 	public void testRequiredFalse() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setRequired(this.field, false);
 		assertFalse(this.options.isRequired(this.field));
 	}
 	
 	@Test
 	public void testRequiredDefaultValue() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		assertFalse(this.options.isRequired(this.field));
 	}
 	
 	@Test
 	public void testSetRequiredTwice() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setRequired(this.field, true);
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.setRequired(this.field, true));
 	}
@@ -221,14 +228,14 @@ public class OptionMapTest {
 	
 	@Test
 	public void testFieldToStringBoth() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setLongName(this.field, "abc");
 		assertEquals("--abc (-a)", this.options.fieldToString(this.field));
 	}
 	
 	@Test
 	public void testFieldToStringShort() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		assertEquals("-a", this.options.fieldToString(this.field));
 	}
 	
@@ -263,7 +270,7 @@ public class OptionMapTest {
 	public void testSanityShortNamedParam() throws CliOptionDefinitionException {
 		this.options.setParamMultiplicity("0..*");
 		this.options.setParam(this.field, 0);
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.sanityChecks());
 	}
 	
@@ -279,7 +286,7 @@ public class OptionMapTest {
 	public void testSanityBothNamesParam() throws CliOptionDefinitionException {
 		this.options.setParamMultiplicity("0..*");
 		this.options.setParam(this.field, 0);
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setLongName(this.field, "a");
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.sanityChecks());
 	}
@@ -327,13 +334,13 @@ public class OptionMapTest {
 	@Test
 	public void testSetDescription() throws CliOptionDefinitionException {
 		this.options.setDescription(this.field, "foobar");
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		assertEquals("foobar", this.options.getDescription(this.field));
 	}
 	
 	@Test
 	public void testGetDefaultDescription() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		assertEquals("", this.options.getDescription(this.field));
 	}
 	
@@ -361,8 +368,8 @@ public class OptionMapTest {
 	
 	@Test
 	public void testSharedShortName() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
-		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, 'b'));
+		this.options.setShortName(this.field, "a");
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, "b"));
 	}
 	
 	@Test
@@ -373,13 +380,13 @@ public class OptionMapTest {
 	
 	@Test
 	public void testPrintOptionFull() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+		this.options.setShortName(this.field, "a");
 		this.options.setLongName(this.field, "a");
 		this.options.setDescription(this.field, "descr1");
-		this.options.setShortName(this.field2, 'b');
+		this.options.setShortName(this.field2, "b");
 		this.options.setLongName(this.field2, "ab");
 		this.options.setDescription(this.field2, "descr2");
-		this.options.setShortName(this.field3, 'c');
+		this.options.setShortName(this.field3, "c");
 		this.options.setLongName(this.field3, "abc");
 		this.options.setDescription(this.field3, "descr3");
 		final ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -403,12 +410,27 @@ public class OptionMapTest {
 	}
 	
 	@Test
-	public void testPrintOptionNoLong() throws CliOptionDefinitionException {
-		this.options.setShortName(this.field, 'a');
+	public void testPrintOptionNoShortButArgs() throws CliOptionDefinitionException {
+		this.options.setLongName(this.field, "a");
+		this.options.setMultiplicity(this.field, 2);
 		this.options.setDescription(this.field, "descr1");
-		this.options.setShortName(this.field2, 'b');
+		this.options.setLongName(this.field2, "b");
 		this.options.setDescription(this.field2, "descr2");
-		this.options.setShortName(this.field3, 'c');
+		this.options.setLongName(this.field3, "c");
+		this.options.setDescription(this.field3, "descr3");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" --a <arg0> <arg1>   descr1\n --b                 descr2\n --c                 descr3\n", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testPrintOptionNoLong() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setDescription(this.field, "descr1");
+		this.options.setShortName(this.field2, "b");
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setShortName(this.field3, "c");
 		this.options.setDescription(this.field3, "descr3");
 		final ByteArrayOutputStream os = new ByteArrayOutputStream();
 		final PrintWriter pw = new PrintWriter(os);
@@ -417,17 +439,62 @@ public class OptionMapTest {
 	}
 	
 	@Test
+	public void testPrintOptionNoLongButArgs() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setMultiplicity(this.field, 2);
+		this.options.setDescription(this.field, "descr1");
+		this.options.setShortName(this.field2, "b");
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setShortName(this.field3, "c");
+		this.options.setDescription(this.field3, "descr3");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" -a <arg0> <arg1>   descr1\n -b                 descr2\n -c                 descr3\n", new String(os.toByteArray()));
+	}
+	
+	@Test
 	public void testPrintOptionMixed() throws CliOptionDefinitionException {
 		this.options.setLongName(this.field, "a");
 		this.options.setDescription(this.field, "descr1");
-		this.options.setShortName(this.field2, 'b');
+		this.options.setShortName(this.field2, "b");
 		this.options.setDescription(this.field2, "descr2");
-		this.options.setShortName(this.field3, 'c');
+		this.options.setShortName(this.field3, "c");
 		this.options.setLongName(this.field3, "abc");
 		final ByteArrayOutputStream os = new ByteArrayOutputStream();
 		final PrintWriter pw = new PrintWriter(os);
 		this.options.printOptionUsage(pw);
-		assertEquals("    --a     descr1\n -b         descr2\n -c,--abc         \n", new String(os.toByteArray()));
+		assertEquals("    --a     descr1\n -b         descr2\n -c,--abc\n", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testPrintOptionFullMultiCharShortOpts() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "aaa");
+		this.options.setLongName(this.field, "a");
+		this.options.setDescription(this.field, "descr1");
+		this.options.setShortName(this.field2, "b");
+		this.options.setLongName(this.field2, "ab");
+		this.options.setDescription(this.field2, "descr2");
+		this.options.setShortName(this.field3, "c");
+		this.options.setLongName(this.field3, "abc");
+		this.options.setDescription(this.field3, "descr3");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" -aaa,--a     descr1\n   -b,--ab    descr2\n   -c,--abc   descr3\n", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testPrintOptionNoOpts() {
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals("", new String(os.toByteArray()));
+	}
+	
+	@Test
+	public void testSetNullShortName() throws CliOptionDefinitionException, CliUsageException {
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, null));
 	}
 	
 	@Test
@@ -467,7 +534,7 @@ public class OptionMapTest {
 	
 	@Test
 	public void testSetShortNameNullField() {
-		assertThrows(IllegalArgumentException.class, () -> this.options.setShortName(null, 'a'));
+		assertThrows(IllegalArgumentException.class, () -> this.options.setShortName(null, "a"));
 	}
 	
 	@Test
@@ -481,8 +548,13 @@ public class OptionMapTest {
 	}
 	
 	@Test
-	public void testGetFieldNullArg() {
-		assertThrows(IllegalArgumentException.class, () -> this.options.getField(null));
+	public void testGetFieldByShortNameNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.getFieldByShortName(null));
+	}
+	
+	@Test
+	public void testGetFieldByLongNameNullArg() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.getFieldByLongName(null));
 	}
 	
 	@Test
@@ -493,5 +565,39 @@ public class OptionMapTest {
 	@Test
 	public void testFieldToStringNullArg() {
 		assertThrows(IllegalArgumentException.class, () -> this.options.fieldToString(null));
+	}
+	
+	@Test
+	public void testSanityShortOptsMergingAmbiguity() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setShortName(this.field2, "b");
+		assertThrows(CliOptionDefinitionException.class, () -> {
+			this.options.setShortName(this.field3, "ab");
+			this.options.sanityChecks();
+		});
+	}
+	
+	@Test
+	public void testSanityShortOptsMergingNoAmbiguity() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setShortName(this.field2, "b");
+		this.options.setShortName(this.field3, "abc");
+		this.options.sanityChecks();
+	}
+	
+	@Test
+	public void testHasShortName() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		assertTrue(this.options.hasShortName("a"));
+	}
+	
+	@Test
+	public void testHasNotShortName() throws CliOptionDefinitionException {
+		assertFalse(this.options.hasShortName("a"));
+	}
+	
+	@Test
+	public void testHasNullShortName() {
+		assertThrows(IllegalArgumentException.class, () -> this.options.hasShortName(null));
 	}
 }

@@ -51,7 +51,7 @@ public class EFieldAnnotationTest {
 	
 	private OptionMap options;
 	
-	@ShortName('o')
+	@ShortName("o")
 	@LongName("opt")
 	@Args(1)
 	@Description("I'm the option")
@@ -97,13 +97,13 @@ public class EFieldAnnotationTest {
 	@Test
 	public void testApplyShortName() throws CliOptionDefinitionException, CliUsageException {
 		EFieldAnnotation.SHORT_NAME.apply(this.optField, this.optField.getAnnotation(ShortName.class), this.options);
-		assertEquals(this.optField, this.options.getField('o'));
+		assertEquals(this.optField, this.options.getFieldByShortName("o"));
 	}
 	
 	@Test
 	public void testApplyLongName() throws CliOptionDefinitionException, CliUsageException {
 		EFieldAnnotation.LONG_NAME.apply(this.optField, this.optField.getAnnotation(LongName.class), this.options);
-		assertEquals(this.optField, this.options.getField("opt"));
+		assertEquals(this.optField, this.options.getFieldByLongName("opt"));
 	}
 	
 	@Test

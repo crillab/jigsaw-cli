@@ -58,8 +58,8 @@ public class ClassParserTest {
 		assertEquals(1, optionMap.nParams());
 		assertEquals(p, optionMap.getParamField(0));
 		final Field f = OptionParserTestClassOk.class.getDeclaredField("field");
-		assertEquals(f, optionMap.getField('f'));
-		assertEquals(f, optionMap.getField("field"));
+		assertEquals(f, optionMap.getFieldByShortName("f"));
+		assertEquals(f, optionMap.getFieldByLongName("field"));
 		assertEquals(1, optionMap.getArgMultiplicity(f));
 	}
 	
@@ -93,7 +93,7 @@ public class ClassParserTest {
 	@NoOpForClass
 	private class OptionParserTestClassOk {
 		
-		@ShortName('f')
+		@ShortName("f")
 		@LongName("field")
 		@Args(1)
 		@NoOpForField
@@ -107,7 +107,7 @@ public class ClassParserTest {
 	@NoOpForClass
 	private class OptionParserTestClassNotOk {
 		
-		@ShortName('f')
+		@ShortName("f")
 		@LongName("field")
 		@Args(-1)
 		@NoOpForField

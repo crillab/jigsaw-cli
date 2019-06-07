@@ -32,9 +32,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * An annotation used to associate an option with a short name (<code>-o</code>) to a field.
- * 
- * The short name must be composed of a single letter.
+ * An annotation used to associate an option with a short name (<code>-o</code>, <code>-opt</code>) to a field.
  * 
  * @author Emmanuel Lonca - lonca@cril.fr
  */
@@ -48,5 +46,5 @@ public @interface ShortName {
 	 * 
 	 * @return the short name of the option
 	 */
-	char value() default '\0';
+	String value();
 }
