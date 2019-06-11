@@ -76,7 +76,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testOk() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"-m", "foobar", "-f"});
 		assertEquals("foobar", obj.mandatory);
@@ -87,7 +87,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testMergedShortNames() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"-m", "foobar", "-fb"});
 		assertEquals("foobar", obj.mandatory);
@@ -98,7 +98,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testMergedShortNamesDisallowedMerging() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.allowShortNamesMerging(false);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"-m", "foobar", "-fb"}));
@@ -107,7 +107,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testMultiplicityError() {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"foobar", "-f", "-m"}));
 	}
@@ -115,7 +115,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testNoMandatory() {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"foobar", "-f"}));
 	}
@@ -123,7 +123,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testLongName() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"--mandatory", "foobar", "--foo"});
 		assertEquals("foobar", obj.mandatory);
@@ -134,7 +134,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testEndOfOptions() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"-m", "foobar", "--", "-fb"});
 		assertEquals("foobar", obj.mandatory);
@@ -145,7 +145,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testEmptyOption() {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"-m", "foobar", "-"}));
 	}
@@ -153,7 +153,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testHyphenAsArg() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"-m", "-", "--"});
 		assertEquals("-", obj.mandatory);
@@ -162,7 +162,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testHyphenHyphenAsArg() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"-m", "--", "--"});
 		assertEquals("--", obj.mandatory);
@@ -171,7 +171,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testMergedWithArg() {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"-mfb", "foobar"}));
 	}
@@ -179,7 +179,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testMulticharShortOpt() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkOptions obj = new TestClassOkOptions();
-		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkOptions> optParser = new ClassParser<>(TestClassOkOptions.class);
 		final CliArgsParser<TestClassOkOptions> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"-m", "foobar", "-multi"});
 		assertEquals("foobar", obj.mandatory);
@@ -199,7 +199,7 @@ public class CliArgsParserTest {
 	@Test
 	public void test2Params() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkClass obj = new TestClassOkClass();
-		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(TestClassOkClass.class);
 		final CliArgsParser<TestClassOkClass> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"a", "1"});
 		assertEquals("a", obj.s);
@@ -209,7 +209,7 @@ public class CliArgsParserTest {
 	@Test
 	public void test1Param() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkClass obj = new TestClassOkClass();
-		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(TestClassOkClass.class);
 		final CliArgsParser<TestClassOkClass> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"a"});
 		assertEquals("a", obj.s);
@@ -219,7 +219,7 @@ public class CliArgsParserTest {
 	@Test
 	public void test0Params() {
 		final TestClassOkClass obj = new TestClassOkClass();
-		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(TestClassOkClass.class);
 		final CliArgsParser<TestClassOkClass> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {}));
 	}
@@ -227,7 +227,7 @@ public class CliArgsParserTest {
 	@Test
 	public void test3Params() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassOkClass obj = new TestClassOkClass();
-		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassOkClass> optParser = new ClassParser<>(TestClassOkClass.class);
 		final CliArgsParser<TestClassOkClass> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliUsageException.class, () -> cliParser.parse(obj, new String[] {"a", "1", "foo"}));
 	}
@@ -243,7 +243,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testGetParameters() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassStar obj = new TestClassStar();
-		final ClassParser<TestClassStar> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassStar> optParser = new ClassParser<>(TestClassStar.class);
 		final CliArgsParser<TestClassStar> cliParser = new CliArgsParser<>(optParser);
 		cliParser.parse(obj, new String[] {"a", "b", "c"});
 		assertEquals(Stream.of("a", "b", "c").collect(Collectors.toList()), cliParser.getParameters());
@@ -265,7 +265,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testAmbiguity() {
 		final TestClassWithAmbiguity obj = new TestClassWithAmbiguity();
-		final ClassParser<TestClassWithAmbiguity> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassWithAmbiguity> optParser = new ClassParser<>(TestClassWithAmbiguity.class);
 		final CliArgsParser<TestClassWithAmbiguity> cliParser = new CliArgsParser<>(optParser);
 		assertThrows(CliOptionDefinitionException.class, () -> cliParser.parse(obj, new String[] {"-a", "-b", "-ab"}));
 	}
@@ -273,7 +273,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testAmbiguityNoMerging() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassWithAmbiguity obj = new TestClassWithAmbiguity();
-		final ClassParser<TestClassWithAmbiguity> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassWithAmbiguity> optParser = new ClassParser<>(TestClassWithAmbiguity.class);
 		final CliArgsParser<TestClassWithAmbiguity> cliParser = new CliArgsParser<>(optParser);
 		cliParser.allowShortNamesMerging(false);
 		cliParser.parse(obj, new String[] {"-a", "-b", "-ab"});
@@ -292,7 +292,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testBooleanConstantsTrue() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassBooleanWithArg obj = new TestClassBooleanWithArg();
-		final ClassParser<TestClassBooleanWithArg> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassBooleanWithArg> optParser = new ClassParser<>(TestClassBooleanWithArg.class);
 		final CliArgsParser<TestClassBooleanWithArg> cliParser = new CliArgsParser<>(optParser);
 		CliArgsParser.setBooleanConstants(new String[] {"never"}, new String[] {"always"});
 		cliParser.parse(obj, new String[] {"-a", "always"});
@@ -302,7 +302,7 @@ public class CliArgsParserTest {
 	@Test
 	public void testBooleanConstantsFalse() throws CliUsageException, CliOptionDefinitionException {
 		final TestClassBooleanWithArg obj = new TestClassBooleanWithArg();
-		final ClassParser<TestClassBooleanWithArg> optParser = new ClassParser<>(obj);
+		final ClassParser<TestClassBooleanWithArg> optParser = new ClassParser<>(TestClassBooleanWithArg.class);
 		final CliArgsParser<TestClassBooleanWithArg> cliParser = new CliArgsParser<>(optParser);
 		CliArgsParser.setBooleanConstants(new String[] {"never"}, new String[] {"always"});
 		obj.a = true;

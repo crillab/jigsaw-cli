@@ -42,19 +42,19 @@ import fr.cril.cli.utils.OptionMap;
  */
 public class ClassParser<T> {
 	
-	private final T instance;
+	private final Class<T> cl;
 	
 	private OptionMap optMap;
 	
 	private boolean allowShortNamesMerging = true;
-	
+
 	/**
-	 * Builds a parser given the class instance under consideration.
+	 * Builds a parser given the class under consideration.
 	 * 
-	 * @param instance the class instance
+	 * @param cl the class
 	 */
-	public ClassParser(final T instance) {
-		this.instance = instance;
+	public ClassParser(final Class<T> cl) {
+		this.cl = cl;
 	}
 	
 	/**
@@ -70,14 +70,14 @@ public class ClassParser<T> {
 	OptionMap parse() throws CliOptionDefinitionException {
 		this.optMap = new OptionMap();
 		this.optMap.allowShortNamesMerging(this.allowShortNamesMerging);
-		for(final Annotation annotation: this.instance.getClass().getAnnotations()) {
+		for(final Annotation annotation: this.cl.getAnnotations()) {
 			final Class<? extends Annotation> annotationType = annotation.annotationType();
 			if(!EClassAnnotation.hasForClass(annotationType)) {
 				continue;
 			}
 			EClassAnnotation.forClass(annotationType).apply(annotation, this.optMap);
 		}
-		for(final Field f : this.instance.getClass().getDeclaredFields()) {
+		for(final Field f : this.cl.getDeclaredFields()) {
 			parseField(this.optMap, f);
 		}
 		this.optMap.sanityChecks();

@@ -75,7 +75,7 @@ public class CliArgsParser<T> {
 	 * @throws CliUsageException if there is a error in the definition of the options (usage of the annotations)
 	 * @throws CliOptionDefinitionException if the CLI arguments are invalid for the {@link ClassParser} (arguments given by the final user)
 	 */
-	public void parse(final Object obj, final String[] argArray) throws CliUsageException, CliOptionDefinitionException {
+	public void parse(final T obj, final String[] argArray) throws CliUsageException, CliOptionDefinitionException {
 		final OptionMap optionMap = this.optParser.parse();
 		this.parameters.clear();
 		this.seen.clear();

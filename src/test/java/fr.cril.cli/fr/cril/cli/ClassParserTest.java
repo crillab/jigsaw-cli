@@ -50,8 +50,7 @@ public class ClassParserTest {
 	
 	@Test
 	public void testOk() throws CliOptionDefinitionException, NoSuchFieldException, SecurityException, CliUsageException {
-		final OptionParserTestClassOk testCl = new OptionParserTestClassOk();
-		final ClassParser<OptionParserTestClassOk> parser = new ClassParser<>(testCl);
+		final ClassParser<OptionParserTestClassOk> parser = new ClassParser<>(OptionParserTestClassOk.class);
 		final OptionMap optionMap = parser.parse();
 		assertEquals(new Multiplicity(1), optionMap.getParamMultiplicity());
 		final Field p = OptionParserTestClassOk.class.getDeclaredField("param");
@@ -65,15 +64,13 @@ public class ClassParserTest {
 	
 	@Test
 	public void testNotOk() throws CliOptionDefinitionException, NoSuchFieldException, SecurityException, CliUsageException {
-		final OptionParserTestClassNotOk testCl = new OptionParserTestClassNotOk();
-		final ClassParser<OptionParserTestClassNotOk> parser = new ClassParser<>(testCl);
+		final ClassParser<OptionParserTestClassNotOk> parser = new ClassParser<>(OptionParserTestClassNotOk.class);
 		assertThrows(CliOptionDefinitionException.class, () -> parser.parse());
 	}
 	
 	@Test
 	public void testPrintOptionUsage() throws CliOptionDefinitionException {
-		final OptionParserTestClassOk testCl = new OptionParserTestClassOk();
-		final ClassParser<OptionParserTestClassOk> parser = new ClassParser<>(testCl);
+		final ClassParser<OptionParserTestClassOk> parser = new ClassParser<>(OptionParserTestClassOk.class);
 		parser.parse();
 		final ByteArrayOutputStream os = new ByteArrayOutputStream();
 		final PrintWriter pw = new PrintWriter(os);
@@ -83,15 +80,13 @@ public class ClassParserTest {
 	
 	@Test
 	public void testShortNamesAmbiguity() {
-		final OptionParserTestWithAmbiguity testCl = new OptionParserTestWithAmbiguity();
-		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(testCl);
+		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(OptionParserTestWithAmbiguity.class);
 		assertThrows(CliOptionDefinitionException.class, () -> parser.parse());
 	}
 	
 	@Test
 	public void testShortNamesAmbiguityNoMerging() throws CliOptionDefinitionException {
-		final OptionParserTestWithAmbiguity testCl = new OptionParserTestWithAmbiguity();
-		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(testCl);
+		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(OptionParserTestWithAmbiguity.class);
 		parser.allowShortNamesMerging(false);
 		parser.parse();
 	}
