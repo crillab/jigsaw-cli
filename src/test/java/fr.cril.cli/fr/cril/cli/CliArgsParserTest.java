@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import fr.cril.cli.annotations.LongName;
@@ -42,6 +43,11 @@ import fr.cril.cli.annotations.Required;
 import fr.cril.cli.annotations.ShortName;
 
 public class CliArgsParserTest {
+	
+	@BeforeEach
+	public void setUp() {
+		CliArgsParser.resetBooleanConstants();
+	}
 	
 	@Params("0..1")
 	private class TestClassOkOptions {
@@ -274,6 +280,34 @@ public class CliArgsParserTest {
 		assertTrue(obj.a);
 		assertTrue(obj.b);
 		assertTrue(obj.ab);
+	}
+	
+	private class TestClassBooleanWithArg {
+		
+		@ShortName("a")
+		@Args(1)
+		private boolean a;
+	}
+	
+	@Test
+	public void testBooleanConstantsTrue() throws CliUsageException, CliOptionDefinitionException {
+		final TestClassBooleanWithArg obj = new TestClassBooleanWithArg();
+		final ClassParser<TestClassBooleanWithArg> optParser = new ClassParser<>(obj);
+		final CliArgsParser<TestClassBooleanWithArg> cliParser = new CliArgsParser<>(optParser);
+		CliArgsParser.setBooleanConstants(new String[] {"never"}, new String[] {"always"});
+		cliParser.parse(obj, new String[] {"-a", "always"});
+		assertTrue(obj.a);
+	}
+	
+	@Test
+	public void testBooleanConstantsFalse() throws CliUsageException, CliOptionDefinitionException {
+		final TestClassBooleanWithArg obj = new TestClassBooleanWithArg();
+		final ClassParser<TestClassBooleanWithArg> optParser = new ClassParser<>(obj);
+		final CliArgsParser<TestClassBooleanWithArg> cliParser = new CliArgsParser<>(optParser);
+		CliArgsParser.setBooleanConstants(new String[] {"never"}, new String[] {"always"});
+		obj.a = true;
+		cliParser.parse(obj, new String[] {"-a", "never"});
+		assertFalse(obj.a);
 	}
 
 }

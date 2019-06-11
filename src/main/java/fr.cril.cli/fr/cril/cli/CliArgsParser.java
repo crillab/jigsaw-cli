@@ -197,5 +197,31 @@ public class CliArgsParser<T> {
 		this.allowShortNamesMerging = allow;
 		this.optParser.allowShortNamesMerging(allow);
 	}
+	
+	/**
+	 * Changes the set of string literals seen as Boolean constants.
+	 * 
+	 * By default, the only recognized values are "true" and "false".
+	 * The new values are passed as two string arrays (the first one containing the values which stand for <code>false</code>,
+	 * the second one containing the values which stand for <code>true</code>).
+	 * 
+	 * Both arrays must be non null, contain at least one string, and strings must be non-null and nonempty.
+	 * No string can be shared by the two arrays.
+	 * 
+	 * @param falseValues the false values
+	 * @param trueValues the true values
+	 */
+	public static void setBooleanConstants(final String[] falseValues, final String[] trueValues) {
+		EFieldType.setBooleanConstants(falseValues, trueValues);
+	}
+	
+	/**
+	 * Resets the set of string literals seen as Boolean constants.
+	 * 
+	 * See {@link EFieldType#setBooleanConstants(String[], String[])}.
+	 */
+	public static void resetBooleanConstants() {
+		EFieldType.resetBooleanConstants();
+	}
 
 }
