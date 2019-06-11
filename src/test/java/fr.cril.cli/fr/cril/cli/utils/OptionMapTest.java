@@ -494,6 +494,17 @@ public class OptionMapTest {
 	}
 	
 	@Test
+	public void testPrintOptionUsageCaseCmp() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "B");
+		this.options.setShortName(this.field2, "a");
+		this.options.setShortName(this.field3, "A");
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" -A\n -a\n -B\n", new String(os.toByteArray()));
+	}
+	
+	@Test
 	public void testSetNullShortName() throws CliOptionDefinitionException, CliUsageException {
 		assertThrows(CliOptionDefinitionException.class, () -> this.options.setShortName(this.field, null));
 	}

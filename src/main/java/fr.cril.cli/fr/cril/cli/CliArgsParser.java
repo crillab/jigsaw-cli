@@ -161,7 +161,7 @@ public class CliArgsParser<T> {
 		final int nAdditional = this.parameters.size();
 		final Multiplicity paramMult = optionMap.getParamMultiplicity();
 		if(nAdditional < paramMult.getMin() || nAdditional > paramMult.getMax()) {
-			throw new CliUsageException("wrong parameter provided: expected between "+paramMult.getMin()+" and "+paramMult.getMax());
+			throw new CliUsageException("wrong parameter count (expected "+paramMult.toHumanReadableString()+")");
 		}
 		for(int i=0; i<Math.min(nAdditional, optionMap.nParams()); ++i) {
 			final Field field = optionMap.getParamField(i);

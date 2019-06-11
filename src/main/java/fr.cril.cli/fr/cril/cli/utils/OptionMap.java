@@ -501,7 +501,8 @@ public class OptionMap {
 			final String name1 = short1 == null ? this.revLongOpts.get(f1) : short1;
 			final String short2 = this.revShortOpts.get(f2);
 			final String name2 = short2 == null ? this.revLongOpts.get(f2) : short2;
-			return name1.compareTo(name2);
+			final int ignCaseCmp = name1.toLowerCase().compareTo(name2.toLowerCase());
+			return ignCaseCmp == 0 ? name1.compareTo(name2) : ignCaseCmp;
 		}).collect(Collectors.toList());
 		final String[][] matrix = buildWordMatrix(fields);
 		printMatrix(out, fields, matrix);

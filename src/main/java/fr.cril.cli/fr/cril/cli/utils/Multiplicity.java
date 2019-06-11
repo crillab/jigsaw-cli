@@ -137,4 +137,19 @@ public class Multiplicity {
 		return "["+this.min+".."+(this.max == Integer.MAX_VALUE ? "*" : this.max)+"]";
 	}
 	
+	/**
+	 * Returns a textual representation of this multiplicity which must be readable by any human.
+	 * 
+	 * @return a human-readable textual representation of this multiplicity
+	 */
+	public String toHumanReadableString() {
+		if(this.min == this.max) {
+			return "exactly "+this.min;
+		}
+		if(this.min == 0) {
+			return this.max == Integer.MAX_VALUE ? "any" : "at most "+this.max;
+		}
+		return this.max == Integer.MAX_VALUE ? "at least "+this.min : "between "+this.min+" and "+this.max;
+	}
+	
 }

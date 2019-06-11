@@ -79,5 +79,17 @@ public class MultiplicityTest {
 	public void testToStringStar() {
 		assertEquals("[1..*]", new Multiplicity("1..*").toString());
 	}
+	
+	@ParameterizedTest
+	@CsvSource({
+		"2, 2, 'exactly 2'",
+		"1, 3, 'between 1 and 3'",
+		"0, 2, 'at most 2'",
+		"1, *, 'at least 1'",
+		"0, *, 'any'"
+	})
+	public void testToHumanReadableString(final String min, final String max, final String expected) {
+		assertEquals(expected, new Multiplicity(min+".."+max).toHumanReadableString());
+	}
 
 }
