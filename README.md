@@ -184,7 +184,7 @@ When a `CliUsageException` is thrown, it may be useful to tell the user what is 
 
 By default, Jigsaw-CLI prevents the declaration of a short name option composed by multiple characters if each character corresponds itself to a short name to prevents ambiguity (if `a`, `b` and `ab` are short names, using `-ab` may activate `-a` and `-b`, or `-ab`). In case you need to define such names, you can deactivate the merging behavior by calling `ClassParser<T>.allowShortNamesMerging(false)` before launching the CLI arguments parsing.
 
-## License
+## License
 
 Jigsaw-CLI is developed at CRIL (Centre de Recherche en Informatique de Lens) as a part of other projects.
 It is made available under the terms of the GNU GPLv3 license.
