@@ -19,8 +19,8 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/crillab/jigsaw-cli.git</connection>
-		<developerConnection>scm:git:ssh://github.com/crillab/jigsaw-cli.git</developerConnection>
+		<connection>scm:git:https://github.com/crillab/jigsaw-cli.git</connection>
+		<developerConnection>scm:git:https://github.com/crillab/jigsaw-cli.git</developerConnection>
 		<url>https://github.com/crillab/jigsaw-cli</url>
 	</scm>
 
