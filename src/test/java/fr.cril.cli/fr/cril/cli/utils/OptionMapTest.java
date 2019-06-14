@@ -1,5 +1,7 @@
 package fr.cril.cli.utils;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 /*-
  * #%L
  * Jigsaw-cli
@@ -620,5 +622,35 @@ public class OptionMapTest {
 		this.options.setShortName(this.field2, "b");
 		this.options.setShortName(this.field3, "ab");
 		this.options.sanityChecks();
+	}
+	
+	@Test
+	public void testSetArgNames() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setMultiplicity(this.field, 2, new String[] {"foo", "bar"});
+		assertArrayEquals(new String[] {"foo", "bar"}, this.options.getArgNames(this.field));
+	}
+	
+	@Test
+	public void testSetWrongNumberOfArgNames() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		assertThrows(CliOptionDefinitionException.class, () -> this.options.setMultiplicity(this.field, 1, new String[] {"foo", "bar"}));
+	}
+	
+	@Test
+	public void testGetDefaultArgNames() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setMultiplicity(this.field, 2);
+		assertArrayEquals(new String[] {"arg0", "arg1"}, this.options.getArgNames(this.field));
+	}
+	
+	@Test
+	public void testPrintOptionNamedArgs() throws CliOptionDefinitionException {
+		this.options.setShortName(this.field, "a");
+		this.options.setMultiplicity(this.field, 2, new String[] {"foo", "bar"});
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(os);
+		this.options.printOptionUsage(pw);
+		assertEquals(" -a <foo> <bar>\n", new String(os.toByteArray()));
 	}
 }

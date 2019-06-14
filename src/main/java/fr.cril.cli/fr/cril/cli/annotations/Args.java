@@ -50,4 +50,6 @@ public @interface Args {
 	 */
 	int value() default 0;
 	
+	String[] names() default {};
+	
 }

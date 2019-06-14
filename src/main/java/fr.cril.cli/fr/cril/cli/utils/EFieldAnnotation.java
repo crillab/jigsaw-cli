@@ -57,7 +57,7 @@ public enum EFieldAnnotation {
 	LONG_NAME(LongName.class, (f, a, o) -> o.setLongName(f, ((LongName) a).value())),
 	
 	/** enumeration constant related to options parameter multiplicities */
-	OPT_ARG_MULTIPLICITY(Args.class, (f, a, o) -> o.setMultiplicity(f, ((Args) a).value())),
+	OPT_ARG_MULTIPLICITY(Args.class, (f, a, o) -> o.setMultiplicity(f, ((Args) a).value(), ((Args) a).names())),
 	
 	/** enumeration constant related to the <code>required</code> flag */
 	REQUIRED(Required.class, (f, a, o) -> o.setRequired(f, ((Required) a).value())),

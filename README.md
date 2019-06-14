@@ -109,6 +109,8 @@ Options may themselves have arguments. The number of arguments is fixed by addin
 Depending on the type of the field, only some values are allowed for `@Args`: see the "Field types" section below for more information.
 The default number of arguments is zero.
 
+Options arguments can be named in order to get improved display when option usage is printed (see below). 
+
 ### Required options
 
 Options may be set as required using the `@Required` annotation. If CLI arguments do not set a required option, a `CliUsageException` is thrown during their parsing.

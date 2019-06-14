@@ -1,5 +1,7 @@
 package fr.cril.cli.utils;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 /*-
  * #%L
  * Jigsaw-cli
@@ -65,11 +67,18 @@ public class EFieldAnnotationTest {
 	
 	private Field paramField;
 	
+	@LongName("named-args")
+	@Args(value=2, names={"foo", "bar"})
+	private String namedArgsOption;
+	
+	private Field namedArgsOptField;
+	
 	@BeforeEach
 	public void setUp() throws NoSuchFieldException, SecurityException {
 		this.options = new OptionMap();
 		this.optField = EFieldAnnotationTest.class.getDeclaredField("option");
 		this.paramField = EFieldAnnotationTest.class.getDeclaredField("param");
+		this.namedArgsOptField = EFieldAnnotationTest.class.getDeclaredField("namedArgsOption");
 	}
 	
 	@ParameterizedTest
@@ -146,6 +155,18 @@ public class EFieldAnnotationTest {
 	@EnumSource(EFieldAnnotation.class)
 	public void testApplyNullOptions(final EFieldAnnotation a) {
 		assertThrows(IllegalArgumentException.class, () -> a.apply(this.optField, this.paramField.getAnnotation(a.getAnnotationClass()), null));
+	}
+	
+	@Test
+	public void testNamedArgs() throws CliOptionDefinitionException {
+		EFieldAnnotation.OPT_ARG_MULTIPLICITY.apply(this.namedArgsOptField, this.namedArgsOptField.getAnnotation(Args.class), this.options);
+		assertArrayEquals(new String[] {"foo", "bar"}, this.options.getArgNames(this.namedArgsOptField));
+	}
+	
+	@Test
+	public void testDefaultNamedArgs() throws CliOptionDefinitionException {
+		EFieldAnnotation.OPT_ARG_MULTIPLICITY.apply(this.optField, this.optField.getAnnotation(Args.class), this.options);
+		assertArrayEquals(new String[] {"arg0"}, this.options.getArgNames(this.optField));
 	}
 	
 }

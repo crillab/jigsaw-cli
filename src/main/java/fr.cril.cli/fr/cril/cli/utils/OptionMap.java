@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,6 +68,8 @@ public class OptionMap {
 	private final Map<Field, String> revLongOpts = new HashMap<>();
 	
 	private final Map<Field, Integer> multiplicities = new HashMap<>();
+	
+	private final Map<Field, String[]> argNames = new HashMap<>();
 	
 	private final Map<Field, Boolean> required = new HashMap<>();
 	
@@ -223,6 +226,29 @@ public class OptionMap {
 	 * @throws CliOptionDefinitionException if the multiplicity is invalid or defined twice
 	 */
 	public void setMultiplicity(final Field field, final int multiplicity) throws CliOptionDefinitionException {
+		setMultiplicity(field, multiplicity, new String[] {});
+	}
+	
+	/**
+	 * Sets the parameter multiplicity of a CLI option associated to a field.
+	 * The names of the arguments is passed for display purpose.
+	 * 
+	 * The multiplicity must be nonnegative, and defined at most once.
+	 * The default multiplicity is zero (the option has no parameter).
+	 * 
+	 * Argument multiplicities must be associated to named fields (with short or long names).
+	 * The check is not processed in this method, allowing to define the option name after the multiplicity;
+	 * the check is done in the {@link OptionMap#sanityChecks()} method.
+	 * 
+	 * The names array must be null (default names are used) or its length must match the multiplicity.
+	 * In the other case, a {@link CliOptionDefinitionException} is thrown.
+	 * 
+	 * @param field the field associated to the CLI option
+	 * @param multiplicity the multiplicity
+	 * @param names the argument names
+	 * @throws CliOptionDefinitionException if the multiplicity is invalid or defined twice
+	 */
+	public void setMultiplicity(final Field field, final int multiplicity, final String[] names) throws CliOptionDefinitionException {
 		checkNullField(field);
 		if(multiplicity < 0) {
 			throw new CliOptionDefinitionException("multiplicity must be a nonnegative integer");
@@ -231,6 +257,12 @@ public class OptionMap {
 			throw new CliOptionDefinitionException(field+": multiple definitions of multiplicity");
 		}
 		this.multiplicities.put(field, multiplicity);
+		if(names.length > 0) {
+			if(names.length != multiplicity) {
+				throw new CliOptionDefinitionException(field+": the number of argument names does not match the multiplicity");
+			}
+			this.argNames.put(field, names);
+		}
 	}
 	
 	/**
@@ -245,6 +277,21 @@ public class OptionMap {
 		checkNullField(field);
 		final Integer mult = this.multiplicities.get(field);
 		return mult == null ? DEFAULT_OPT_MULT : mult;
+	}
+	
+	/**
+	 * Returns a string describing the argument names of an option given by its field.
+	 * 
+	 * Those names may have been given by a call to {@link OptionMap#setMultiplicity(Field, int, String[])}.
+	 * In case no names were given, the default pattern (<code>&lt;arg0&gt; &lt;arg1&gt; ...</code>) is returned.
+	 * 
+	 * @param field the field under consideration
+	 * @return the argument names
+	 */
+	public String[] getArgNames(final Field field) {
+		checkNullField(field);
+		final String[] names = this.argNames.get(field);
+		return names != null ? names : IntStream.range(0, getArgMultiplicity(field)).mapToObj(i -> "arg"+i).toArray(String[]::new);
 	}
 	
 	/**
@@ -521,7 +568,7 @@ public class OptionMap {
 			if(longOpt != null) {
 				matrix[i][1] = "--"+longOpt;
 			}
-			final Optional<String> args = IntStream.range(0, this.getArgMultiplicity(f)).mapToObj(j -> "<arg"+j+">").reduce((a,b) -> a+" "+b);
+			final Optional<String> args = Arrays.stream(getArgNames(f)).map(s -> "<"+s+">").reduce((a,b) -> a+" "+b);
 			if(args.isPresent()) {
 				matrix[i][2] = args.get();
 			}
