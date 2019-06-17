@@ -28,13 +28,11 @@ import java.io.PrintWriter;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -145,6 +143,30 @@ public class OptionMap {
 			throw new IllegalArgumentException();
 		}
 		return this.shortOpts.containsKey(shortName);
+	}
+	
+	/**
+	 * Returns the short name associated to a field.
+	 * 
+	 * If the field has no short name, <code>null</code> is returned.
+	 * 
+	 * @param f the field
+	 * @return the field's short name, or <code>null</code> is none
+	 */
+	String getShortName(final Field f) {
+		return this.revShortOpts.get(f);
+	}
+	
+	/**
+	 * Returns the long name associated to a field.
+	 * 
+	 * If the field has no long name, <code>null</code> is returned.
+	 * 
+	 * @param f the field
+	 * @return the field's long name, or <code>null</code> is none
+	 */
+	String getLongName(final Field f) {
+		return this.revLongOpts.get(f);
 	}
 	
 	/**
@@ -543,111 +565,20 @@ public class OptionMap {
 	 * @param out the {@link PrintWriter}
 	 */
 	public void printOptionUsage(final PrintWriter out) {
-		final List<Field> fields = Stream.concat(this.revShortOpts.keySet().stream(), this.revLongOpts.keySet().stream()).distinct().sorted((f1, f2) -> {
-			final String short1 = this.revShortOpts.get(f1);
-			final String name1 = short1 == null ? this.revLongOpts.get(f1) : short1;
-			final String short2 = this.revShortOpts.get(f2);
-			final String name2 = short2 == null ? this.revLongOpts.get(f2) : short2;
-			final int ignCaseCmp = name1.toLowerCase().compareTo(name2.toLowerCase());
-			return ignCaseCmp == 0 ? name1.compareTo(name2) : ignCaseCmp;
-		}).collect(Collectors.toList());
-		final String[][] matrix = buildWordMatrix(fields);
-		printMatrix(out, fields, matrix);
-		out.flush();
-	}
-
-	private String[][] buildWordMatrix(final List<Field> fields) {
-		final String[][] matrix = new String[fields.size()][4];
-		for(int i=0; i<fields.size(); ++i) {
-			final Field f = fields.get(i);
-			final String shortOpt = this.revShortOpts.get(f);
-			if(shortOpt != null) {
-				matrix[i][0] = "-"+shortOpt;
-			}
-			final String longOpt = this.revLongOpts.get(f);
-			if(longOpt != null) {
-				matrix[i][1] = "--"+longOpt;
-			}
-			final Optional<String> args = Arrays.stream(getArgNames(f)).map(s -> "<"+s+">").reduce((a,b) -> a+" "+b);
-			if(args.isPresent()) {
-				matrix[i][2] = args.get();
-			}
-			matrix[i][3] = this.descriptions.get(f);
-		}
-		return matrix;
+		final OptionUsagePrinter printer = new OptionUsagePrinter(this);
+		printer.print(out);
 	}
 	
-	private void printMatrix(final PrintWriter out, final List<Field> fields, final String[][] matrix) {
-		final int maxShortOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][0]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
-		final int maxLongOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][1]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
-		final int maxArgOptSize = IntStream.range(0, fields.size()).mapToObj(i -> matrix[i][2]).filter(Objects::nonNull).mapToInt(String::length).max().orElse(0);
-		if(maxShortOptSize != 0) {
-			if(maxLongOptSize != 0) {
-				printMatrixBothShortAndLongOpts(out, matrix, maxShortOptSize, maxLongOptSize, maxArgOptSize);
-			} else {
-				printMatrixShortOptsOnly(out, matrix, maxShortOptSize, maxArgOptSize);
-			}
-		} else if(maxLongOptSize != 0) {
-			printMatrixLongOptsOnly(out, matrix, maxLongOptSize, maxArgOptSize);
-		}
-		out.flush();
+	/**
+	 * Computes the list of fields that have a name (short or long).
+	 * Duplicates are removed.
+	 * 
+	 * @return the list of fields that have a name
+	 */
+	List<Field> namedFields() {
+		return Stream.concat(this.revShortOpts.keySet().stream(), this.revLongOpts.keySet().stream()).distinct().collect(Collectors.toList());
 	}
 
-	private void printMatrixShortOptsOnly(final PrintWriter out, final String[][] matrix, final int maxShortOptSize, final int maxArgOptSize) {
-		for(int i=0; i<matrix.length; ++i) {
-			final String format = " %"+maxShortOptSize+"s";
-			out.printf(format, matrix[i][0]);
-			printArgs(out, matrix, i, maxArgOptSize);
-			printDescr(out, matrix, i);
-		}
-	}
-
-	private void printArgs(final PrintWriter out, final String[][] matrix, final int fieldIndex, final int maxArgOptSize) {
-		final String args = matrix[fieldIndex][2];
-		if(maxArgOptSize > 0) {
-			if(args == null) {
-				out.print(IntStream.range(0, 1+maxArgOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse(""));
-			} else {
-				final String format = " %-"+maxArgOptSize+"s";
-				out.printf(format, args);
-			}
-		}
-	}
-
-	private void printDescr(final PrintWriter out, final String[][] matrix, final int fieldIndex) {
-		final String descr = matrix[fieldIndex][3];
-		if(descr != null) {
-			out.printf("   %s", descr);
-		}
-		out.print('\n');
-	}
-
-	private void printMatrixLongOptsOnly(final PrintWriter out, final String[][] matrix, final int maxLongOptSize, final int maxArgOptSize) {
-		for(int i=0; i<matrix.length; ++i) {
-			final String format = " %-"+maxLongOptSize+"s";
-			out.printf(format, matrix[i][1]);
-			printArgs(out, matrix, i, maxArgOptSize);
-			printDescr(out, matrix, i);
-		}
-	}
-
-	private void printMatrixBothShortAndLongOpts(final PrintWriter out, final String[][] matrix, final int maxShortOptSize, final int maxLongOptSize, final int maxArgOptSize) {
-		final String emptyShortOpt = IntStream.range(0, maxShortOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse("");
-		final String shortOptFormat = "%"+maxShortOptSize+"s";
-		final String emptyLongOpt = IntStream.range(0, maxLongOptSize).mapToObj(i -> " ").reduce((a,b) -> a+b).orElse("");
-		final String longOptFormat = "%-"+maxLongOptSize+"s";
-		for(int i=0; i<matrix.length; ++i) {
-			out.print(' ');
-			final String shortOpt = matrix[i][0];
-			out.print(shortOpt == null ? emptyShortOpt : String.format(shortOptFormat, shortOpt));
-			final String longOpt = matrix[i][1];
-			out.print(shortOpt != null && longOpt != null ? ',' : ' ');
-			out.print(longOpt == null ? emptyLongOpt : String.format(longOptFormat, longOpt));
-			printArgs(out, matrix, i, maxArgOptSize);
-			printDescr(out, matrix, i);
-		}
-	}
-	
 	/**
 	 * Allows short names merging in CLI arguments (<code>-ab</code> means <code>-a -b</code>).
 	 * The merging is allowed only if the options take no parameter.

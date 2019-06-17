@@ -12,7 +12,7 @@ public class MyAwesomeApp {
 	@ShortName("n")
 	@LongName("number")
 	@Args(1)
-	@Description("a number [required]")
+	@Description("a number")
 	@Required
 	private int number;
 	
