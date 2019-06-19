@@ -1,5 +1,10 @@
 # Jigsaw-CLI
 
+[![Build Status](https://travis-ci.org/crillab/jigsaw-cli.svg?branch=master)](https://travis-ci.org/crillab/jigsaw-cli)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=fr.cril.cli%3Afr.cril.cli&metric=alert_status)](https://sonarcloud.io/dashboard?id=fr.cril.cli%3Afr.cril.cli)
+[![License](https://img.shields.io/github/license/crillab/jigsaw-cli.svg)](https://github.com/crillab/jigsaw-cli/blob/master/LICENSE)
+
+
 Jigsaw-CLI is a Java command-line arguments parsing library based on annotations.
 Contrary to most of this kind of library, Jigsaw-CLI implements the Java module system introduced in Java 9.
 
