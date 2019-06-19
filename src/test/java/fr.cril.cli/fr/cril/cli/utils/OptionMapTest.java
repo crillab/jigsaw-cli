@@ -1,6 +1,7 @@
 package fr.cril.cli.utils;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /*-
  * #%L
@@ -154,21 +155,21 @@ public class OptionMapTest {
 	
 	@Test
 	public void testSanityNoParams() throws CliOptionDefinitionException {
-		this.options.sanityChecks();
+		assertDoesNotThrow(() -> this.options.sanityChecks());
 	}
 	
 	@Test
 	public void testMultSanityOkShort() throws CliOptionDefinitionException {
 		this.options.setShortName(this.field, "a");
 		this.options.setMultiplicity(this.field, 1);
-		this.options.sanityChecks();
+		assertDoesNotThrow(() -> this.options.sanityChecks());
 	}
 	
 	@Test
 	public void testMultSanityOkLong() throws CliOptionDefinitionException {
 		this.options.setLongName(this.field, "a");
 		this.options.setMultiplicity(this.field, 1);
-		this.options.sanityChecks();
+		assertDoesNotThrow(() -> this.options.sanityChecks());
 	}
 	
 	@Test
@@ -176,7 +177,7 @@ public class OptionMapTest {
 		this.options.setShortName(this.field, "a");
 		this.options.setLongName(this.field, "a");
 		this.options.setMultiplicity(this.field, 1);
-		this.options.sanityChecks();
+		assertDoesNotThrow(() -> this.options.sanityChecks());
 	}
 	
 	@Test
@@ -596,7 +597,7 @@ public class OptionMapTest {
 		this.options.setShortName(this.field, "a");
 		this.options.setShortName(this.field2, "b");
 		this.options.setShortName(this.field3, "abc");
-		this.options.sanityChecks();
+		assertDoesNotThrow(() -> this.options.sanityChecks());
 	}
 	
 	@Test
@@ -621,7 +622,7 @@ public class OptionMapTest {
 		this.options.setShortName(this.field, "a");
 		this.options.setShortName(this.field2, "b");
 		this.options.setShortName(this.field3, "ab");
-		this.options.sanityChecks();
+		assertDoesNotThrow(() -> this.options.sanityChecks());
 	}
 	
 	@Test

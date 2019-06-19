@@ -27,6 +27,7 @@ package fr.cril.cli;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -88,7 +89,7 @@ public class ClassParserTest {
 	public void testShortNamesAmbiguityNoMerging() throws CliOptionDefinitionException {
 		final ClassParser<OptionParserTestWithAmbiguity> parser = new ClassParser<>(OptionParserTestWithAmbiguity.class);
 		parser.allowShortNamesMerging(false);
-		parser.parse();
+		assertDoesNotThrow(() -> parser.parse());
 	}
 	
 	@Retention(RUNTIME)
