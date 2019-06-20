@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.cril.cli</groupId>
 	<artifactId>fr.cril.cli</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Jigsaw CLI library (${project.groupId}:${project.artifactId})</name>
 	<description>An annotation-based CLI interface for Jigsaw projects</description>
@@ -20,7 +20,7 @@
 		<connection>scm:git:https://github.com/crillab/jigsaw-cli.git</connection>
 		<developerConnection>scm:git:https://github.com/crillab/jigsaw-cli.git</developerConnection>
 		<url>https://github.com/crillab/jigsaw-cli</url>
-	  <tag>fr.cril.cli-1.0.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<organization>
