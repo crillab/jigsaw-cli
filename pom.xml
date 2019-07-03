@@ -141,7 +141,7 @@
 						<version>1.20</version>
 						<configuration>
 							<licenseName>jigsaw-cli</licenseName>
-							<licenseResolver>${project.baseUri}/license</licenseResolver>
+							<licenseResolver>${project.baseUri}/license-files</licenseResolver>
 							<projectName>Jigsaw-cli</projectName>
 						</configuration>
 						<executions>
