@@ -50,7 +50,7 @@ public class MyAwesomeApp {
 		} catch (CliUsageException e) {
 			System.out.println("error in the CLI arguments: "+e.getMessage());
 			System.out.println("available options:");
-			classParser.printOptionUsage(System.out);
+			classParser.printOptionUsage(new PrintWriter(System.out));
 			throw new IllegalArgumentException("error in the provided CLI arguments: "+e.getMessage());
 		} catch (CliOptionDefinitionException e) {
 			throw new IllegalArgumentException("error in the CLI arguments definition: "+e.getMessage());
